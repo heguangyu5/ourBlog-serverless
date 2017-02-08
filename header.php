@@ -3,6 +3,10 @@
         echo 'you should set $headTitle to include this file';
         exit;
     }
+
+    if (!isset($db)) {
+        include __DIR__ . '/db.php';
+    }
 ?>
 
 <!DOCTYPE html>
@@ -20,7 +24,6 @@
             <a href="index.php" class="no-underline mar-rgt-lg">OurBlog</a>
             <a href="index.php" class="text-sm mar-rgt">首页</a>
             <?php
-                include __DIR__ . '/db.php';
                 $stmt = $db->query('SELECT id, name FROM category', PDO::FETCH_OBJ);
                 foreach ($stmt as $row) {
                     echo '<a href="index.php?category=', $row->id, '" class="text-sm mar-rgt">', htmlspecialchars($row->name), '</a>';
