@@ -15,7 +15,7 @@
         <?php echo htmlspecialchars($row->title); ?>
         <div class="pull-right">
             <a href="edit.php">编辑</a>
-            <a href="delete.php">删除</a>
+            <a href="delete.php?id=<?php echo $row->id; ?>">删除</a>
         </div>
     </div>
 <?php endforeach; ?>
