@@ -29,10 +29,13 @@ textarea {
 .pull-right {
     float: right;
 }
+.hide {
+    display: none;
+}
 
 /* width */
-.max-width-800 {
-    max-width: 800px;
+.max-width-1200 {
+    max-width: 1200px;
 }
 .w100 {
     width: 100px;

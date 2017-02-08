@@ -19,7 +19,7 @@
     <link href="style.css" rel="stylesheet">
 </head>
 <body>
-    <div class="margin-center max-width-800">
+    <div class="margin-center max-width-1200">
         <h1 class="border-btm text-lft">
             <a href="index.php" class="no-underline mar-rgt-lg">OurBlog</a>
             <a href="index.php" class="text-sm mar-rgt">首页</a>

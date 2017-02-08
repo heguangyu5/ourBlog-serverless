@@ -24,7 +24,21 @@
     include __DIR__ . '/header.php';
 ?>
 
+<link rel="stylesheet" href="editormd/editormd.preview.min.css">
+
 <div class="text-lft">
-    <h3><?php echo htmlspecialchars($post->title); ?></h3>
-    <div><?php echo nl2br(htmlspecialchars($post->content)); ?></div>
+    <div id="editormd">
+        <textarea class="hide"><?php
+            echo '# ', htmlspecialchars($post->title), "\n";
+            echo htmlspecialchars($post->content);
+        ?></textarea>
+    </div>
 </div>
+
+<script src="jquery-3.0.0.min.js"></script>
+<script src="editormd/lib/marked.min.js"></script>
+<script src="editormd/lib/prettify.min.js"></script>
+<script src="editormd/editormd.min.js"></script>
+<script>
+    editormd.markdownToHTML('editormd');
+</script>

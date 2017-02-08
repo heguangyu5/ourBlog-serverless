@@ -15,7 +15,7 @@
     <link href="../style.css" rel="stylesheet">
 </head>
 <body>
-    <div class="margin-center max-width-800">
+    <div class="margin-center max-width-1200">
         <h1 class="border-btm text-lft">
             <div class="pull-right text-sm" style="padding-top:18px">
                 <a href="javascript:void(0);"><?php echo htmlspecialchars($_SESSION['email']); ?></a>

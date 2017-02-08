@@ -66,6 +66,8 @@
     }
 ?>
 
+<link rel="stylesheet" href="../editormd/editormd.min.css">
+
 <form method="POST" class="text-lft">
     <select name="category" class="block mar-btm">
         <option value="">所属栏目</option>
@@ -77,8 +79,27 @@
         ?>
     </select>
     <input type="text" name="title" placeholder="标题" class="block mar-btm">
-    <textarea name="content" placeholder="正文" class="block mar-btm"></textarea>
+    <div id="editormd">
+        <textarea name="content" class="hide"></textarea>
+    </div>
     <button type="submit">提交</button>
 </form>
+
+<script src="../jquery-3.0.0.min.js"></script>
+<script src="../editormd/editormd.min.js"></script>
+<script>
+    editormd('editormd', {
+        path: '../editormd/lib/',
+        height: 600,
+        toolbarIcons: [
+            'undo', 'redo', '|',
+            'bold', 'del', 'italic', 'quote', 'h2', 'h3', '|',
+            'list-ul', 'list-ol', 'hr', '|',
+            'link',  'image', 'code', 'preformatted-text', 'code-block', 'table', 'html-entities', '|',
+            'preview', 'fullscreen', 'clear', 'search', 'help', 'info'
+        ],
+        placeholder: '正文'
+    });
+</script>
 
 <?php include __DIR__ . '/footer.php'; ?>
