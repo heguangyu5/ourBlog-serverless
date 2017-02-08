@@ -23,7 +23,7 @@ CREATE TABLE `posts` (
   `title` varchar(500) NOT NULL,
   `content` text NOT NULL,
   `create_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `update_date` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `update_date` timestamp NOT NULL DEFAULT '2017-01-01 00:00:00',
   PRIMARY KEY (`id`),
   KEY `uid` (`uid`),
   KEY `category` (`category`)
