@@ -61,7 +61,7 @@
     <link href="../style.css" rel="stylesheet">
 </head>
 <body>
-    <div class="margin-center max-width-800">
+    <div class="margin-center max-width-1200">
         <h1 class="border-btm text-lft">OurBlog</h1>
         <?php
             if ($error) {
