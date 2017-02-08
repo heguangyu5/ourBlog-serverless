@@ -42,6 +42,7 @@
             $uid  = $stmt->fetchColumn();
             if ($uid) {
                 $_SESSION['uid'] = $uid;
+                $_SESSION['email'] = $_POST['email'];
                 header('Location: ./index.php');
                 exit;
             }
@@ -70,11 +71,11 @@
         <form method="POST">
             <div class="mar-btm">
                 <label class="inline-block w100 text-rgt">E-mail:</label>
-                <input type="text" name="email">
+                <input type="text" name="email" class="w200">
             </div>
             <div class="mar-btm">
                 <label class="inline-block w100 text-rgt">密码:</label>
-                <input type="password" name="password">
+                <input type="password" name="password" class="w200">
             </div>
             <button type="submit">登录</button>
         </form>
