@@ -17,11 +17,11 @@
 <body>
     <div class="margin-center max-width-800">
         <h1 class="border-btm text-lft">
-            <a href="index.php" class="no-underline mar-rgt-lg">OurBlog</a>
-            <a href="index.php" class="text-sm">博文管理</a>
-            <a href="add.php" class="text-sm">写博文</a>
             <div class="pull-right text-sm" style="padding-top:18px">
                 <a href="javascript:void(0);"><?php echo htmlspecialchars($_SESSION['email']); ?></a>
                 <a href="logout.php">退出</a>
             </div>
+            <a href="index.php" class="no-underline mar-rgt-lg">OurBlog</a>
+            <a href="index.php" class="text-sm">博文管理</a>
+            <a href="add.php" class="text-sm">写博文</a>
         </h1>

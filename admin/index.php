@@ -14,7 +14,7 @@
     <div class="mar-btm">
         <?php echo htmlspecialchars($row->title); ?>
         <div class="pull-right">
-            <a href="edit.php">编辑</a>
+            <a href="edit.php?id=<?php echo $row->id; ?>">编辑</a>
             <a href="delete.php?id=<?php echo $row->id; ?>">删除</a>
         </div>
     </div>
