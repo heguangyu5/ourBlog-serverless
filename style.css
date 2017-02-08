@@ -1,0 +1,34 @@
+.margin-center {
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+}
+.max-width-800 {
+    max-width: 800px;
+}
+
+.inline-block {
+    display: inline-block;
+}
+.w100 {
+    width: 100px;
+}
+
+.border-btm {
+    border-bottom: 1px solid;
+}
+
+.text-lft {
+    text-align: left;
+}
+.text-rgt {
+    text-align: right;
+}
+
+.mar-btm {
+    margin-bottom: 15px;
+}
+
+.text-red {
+    color: red;
+}
