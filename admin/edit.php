@@ -125,7 +125,10 @@
             'link',  'image', 'code', 'preformatted-text', 'code-block', 'table', 'html-entities', '|',
             'preview', 'fullscreen', 'clear', 'search', 'help', 'info'
         ],
-        placeholder: '正文'
+        placeholder: '正文',
+        imageUpload: true,
+        imageFormats: ['jpg', 'png', 'gif'],
+        imageUploadURL: 'upload.php'
     });
 </script>
 
