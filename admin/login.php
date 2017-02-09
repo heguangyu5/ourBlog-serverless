@@ -41,6 +41,7 @@
             $stmt->execute(array($_POST['email'], $_POST['password']));
             $uid  = $stmt->fetchColumn();
             if ($uid) {
+                session_regenerate_id(true);
                 $_SESSION['uid'] = $uid;
                 $_SESSION['email'] = $_POST['email'];
                 header('Location: ./index.php');
