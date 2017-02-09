@@ -30,6 +30,7 @@
     <div id="editormd">
         <textarea class="hide"><?php
             echo '# ', htmlspecialchars($post->title), "\n";
+            echo "\n[TOC]\n\n";
             echo htmlspecialchars($post->content);
         ?></textarea>
     </div>
@@ -40,5 +41,5 @@
 <script src="editormd/lib/prettify.min.js"></script>
 <script src="editormd/editormd.min.js"></script>
 <script>
-    editormd.markdownToHTML('editormd');
+    editormd.markdownToHTML('editormd', {tocStartLevel: 2});
 </script>
