@@ -24,4 +24,5 @@
             <a href="index.php" class="no-underline mar-rgt-lg">OurBlog</a>
             <a href="index.php" class="text-sm">博文管理</a>
             <a href="add.php" class="text-sm">写博文</a>
+            <a href="../index.php" class="text-sm" target="_blank">前台首页</a>
         </h1>
