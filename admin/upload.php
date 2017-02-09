@@ -54,7 +54,8 @@ try {
     $mimeTypes = array(
         'jpg' => 'image/jpeg',
         'png' => 'image/png',
-        'gif' => 'image/gif'
+        'gif' => 'image/gif',
+        'zip' => 'application/zip'
     );
     if (isset($mimeTypes[$ext])) {
         $finfo = new finfo(FILEINFO_MIME_TYPE);

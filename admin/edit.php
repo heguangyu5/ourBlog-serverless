@@ -127,7 +127,7 @@
         ],
         placeholder: '正文',
         imageUpload: true,
-        imageFormats: ['jpg', 'png', 'gif'],
+        imageFormats: ['jpg', 'png', 'gif', 'zip'],
         imageUploadURL: 'upload.php'
     });
 </script>
