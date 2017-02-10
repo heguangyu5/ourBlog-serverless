@@ -7,6 +7,7 @@
 
     $error = false;
     if ($_POST) {
+        include __DIR__ . '/prevent-csrf.php';
         try {
             $requiredKeys = array('email', 'password');
             foreach ($requiredKeys as $key) {

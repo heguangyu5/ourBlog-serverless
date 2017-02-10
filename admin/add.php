@@ -4,6 +4,7 @@
 
     $error = false;
     if ($_POST) {
+        include __DIR__ . '/prevent-csrf.php';
         try {
             $requiredKeys = array('category', 'title', 'content');
             foreach ($requiredKeys as $key) {

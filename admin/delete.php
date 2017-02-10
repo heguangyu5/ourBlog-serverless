@@ -1,4 +1,5 @@
 <?php
+    include __DIR__ . '/prevent-csrf.php';
     include __DIR__ . '/check-login.php';
 
     $error = false;

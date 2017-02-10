@@ -1,5 +1,7 @@
 <?php
 
+include __DIR__ . '/prevent-csrf.php';
+
 header('Content-Type:application/json;charset=UTF-8');
 
 session_start();
