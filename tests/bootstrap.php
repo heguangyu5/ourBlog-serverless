@@ -1,6 +1,8 @@
 <?php
 
+include __DIR__ . '/../lib/OurBlog/Util.php';
 include __DIR__ . '/../lib/OurBlog/Auth.php';
+include __DIR__ . '/../lib/OurBlog/Post.php';
 
 class OurBlog_DbUnit_ArrayDataSet extends PHPUnit_Extensions_Database_DataSet_AbstractDataSet
 {

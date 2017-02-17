@@ -5,57 +5,17 @@
     $error = false;
     if ($_POST) {
         include __DIR__ . '/prevent-csrf.php';
+        include __DIR__ . '/../lib/OurBlog/Util.php';
+        include __DIR__ . '/../lib/OurBlog/Post.php';
         try {
-            $requiredKeys = array('category', 'title', 'content');
-            foreach ($requiredKeys as $key) {
-                if (!isset($_POST[$key])) {
-                    throw new InvalidArgumentException("missing required key $key");
-                }
-                $_POST[$key] = trim($_POST[$key]);
-                if (empty($_POST[$key])) {
-                    throw new InvalidArgumentException("$key required");
-                }
-            }
-            // category
-            $_POST['category'] = filter_var($_POST['category'], FILTER_VALIDATE_INT, array(
-                'options' => array('min_range' => 1)
-            ));
-            if (!$_POST['category']) {
-                throw new InvalidArgumentException('invalid category');
-            }
-            // title
-            $len = mb_strlen($_POST['title'], 'UTF-8');
-            if ($len > 500) {
-                throw new InvalidArgumentException('title maxlength is 500');
-            }
-            // content
-            $len = strlen($_POST['content']);
-            if ($len > 64000) {
-                throw new InvalidArgumentException('content maxlength is 64000');
-            }
+            $post = new OurBlog_Post($db, $uid);
+            $post->add($_POST);
+            header('Location: ./index.php');
+            exit;
         } catch (InvalidArgumentException $e) {
             $error = '参数不对';
-        }
-
-        if (!$error) {
-            $createDate = date('Y-m-d H:i:s');
-            try {
-                $stmt = $db->prepare('INSERT INTO posts(uid, category, title, content, create_date, update_date) VALUES (?, ?, ?, ?, ?, ?)');
-                $stmt->execute(array(
-                    $uid,
-                    $_POST['category'],
-                    $_POST['title'],
-                    $_POST['content'],
-                    $createDate,
-                    $createDate
-                ));
-            } catch (Exception $e) {
-                $error = 'Server Error';
-            }
-            if (!$error) {
-                header('Location: ./index.php');
-                exit;
-            }
+        } catch (Exception $e) {
+            $error = 'Server Error';
         }
     }
 
