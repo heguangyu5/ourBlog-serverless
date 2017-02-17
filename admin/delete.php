@@ -2,22 +2,15 @@
     include __DIR__ . '/prevent-csrf.php';
     include __DIR__ . '/check-login.php';
 
-    $error = false;
+    include __DIR__ . '/../db.php';
+    include __DIR__ . '/../lib/OurBlog/Util.php';
+    include __DIR__ . '/../lib/OurBlog/Post.php';
     try {
-        if (!isset($_GET['id'])) {
-            throw new InvalidArgumentException('missing required key id');
-        }
-        // id
-        $id = filter_var($_GET['id'], FILTER_VALIDATE_INT, array(
-            'options' => array('min_range' => 1)
-        ));
-        if (!$id) {
-            throw new InvalidArgumentException('invalid id');
-        }
+        $post = new OurBlog_Post($db, $uid);
+        $post->delete(OurBlog_Util::getQuery('id'));
+        header('Location: ./index.php');
     } catch (InvalidArgumentException $e) {
         die('参数不对');
+    } catch (Exception $e) {
+        die('Server Error');
     }
-
-    include __DIR__ . '/../db.php';
-    $db->exec("DELETE FROM posts WHERE id = $id AND uid = $uid");
-    header('Location: ./index.php');

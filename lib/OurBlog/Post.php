@@ -85,5 +85,12 @@ class OurBlog_Post
     }
 
     public function delete($id)
-    {}
+    {
+        $id = OurBlog_Util::DBAIPK($id);
+        if (!$id) {
+            throw new InvalidArgumentException('invalid id');
+        }
+
+        $this->db->exec("DELETE FROM posts WHERE id = $id AND uid = " . $this->uid);
+    }
 }
