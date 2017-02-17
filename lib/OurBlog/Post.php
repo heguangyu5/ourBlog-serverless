@@ -60,7 +60,29 @@ class OurBlog_Post
     }
 
     public function edit(array $data)
-    {}
+    {
+        if (!isset($data['id'])) {
+            throw new InvalidArgumentException('missing required key id');
+        }
+        $id = OurBlog_Util::DBAIPK($data['id']);
+        if (!$id) {
+            throw new InvalidArgumentException('invalid id');
+        }
+
+        $data = $this->preparePostData($data);
+
+        $updateDate = date('Y-m-d H:i:s');
+
+        $stmt = $this->db->prepare("UPDATE posts SET category = ?, title = ?, content = ?, update_date = ? WHERE id = ? AND uid = ?");
+        $stmt->execute(array(
+            $data['category'],
+            $data['title'],
+            $data['content'],
+            $updateDate,
+            $id,
+            $this->uid
+        ));
+    }
 
     public function delete($id)
     {}
