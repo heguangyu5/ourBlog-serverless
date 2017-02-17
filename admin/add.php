@@ -36,8 +36,18 @@
             }
             // content
             $len = strlen($_POST['content']);
-            if ($len > 64000) {
-                throw new InvalidArgumentException('content maxlength is 64000');
+            if (isset($_POST['external-post']) && $_POST['external-post'] == '1') {
+                if ($len > 1000) {
+                    throw new InvalidArgumentException('external post url too long');
+                }
+                if (!preg_match('#^https?://[^"]+$#', $_POST['content'])) {
+                    throw new InvalidArgumentException('invalid external post url');
+                }
+            } else {
+                if ($len > 64000) {
+                    throw new InvalidArgumentException('content maxlength is 64000');
+                }
+                $_POST['external-post'] = 0;
             }
             // tags
             $hasTag = false;
@@ -88,12 +98,13 @@
             $db->beginTransaction();
             try {
                 // post
-                $stmt = $db->prepare('INSERT INTO posts(uid, category, title, content, create_date, update_date) VALUES (?, ?, ?, ?, ?, ?)');
+                $stmt = $db->prepare('INSERT INTO posts(uid, category, title, content, external_post, create_date, update_date) VALUES (?, ?, ?, ?, ?, ?, ?)');
                 $stmt->execute(array(
                     $uid,
                     $_POST['category'],
                     $_POST['title'],
                     $_POST['content'],
+                    $_POST['external-post'],
                     $createDate,
                     $createDate
                 ));
@@ -147,6 +158,8 @@
         ?>
     </select>
     <input type="text" name="title" placeholder="标题" class="block mar-btm">
+    <label class="block mar-btm"><input type="checkbox" name="external-post" id="external-post" style="width:auto" value="1"> 外部文章</label>
+    <input type="hidden" id="external-post-url" placeholder="http(s)://" value="http://">
     <div id="editormd">
         <textarea name="content" class="hide"></textarea>
     </div>
@@ -172,6 +185,17 @@
         imageUpload: true,
         imageFormats: ['jpg', 'png', 'gif', 'zip'],
         imageUploadURL: 'upload.php'
+    });
+    $('#external-post').click(function () {
+        if ($(this).prop('checked')) {
+            $('#editormd').hide();
+            $('#editormd > textarea').removeAttr('name');
+            $('#external-post-url').attr('type', 'text').attr('name', 'content');
+        } else {
+            $('#external-post-url').attr('type', 'hidden').removeAttr('name');
+            $('#editormd > textarea').attr('name', 'content');
+            $('#editormd').show();
+        }
     });
 </script>
 

@@ -42,11 +42,6 @@
             if ($len > 500) {
                 throw new InvalidArgumentException('title maxlength is 500');
             }
-            // content
-            $len = strlen($_POST['content']);
-            if ($len > 64000) {
-                throw new InvalidArgumentException('content maxlength is 64000');
-            }
             // tags
             $hasTag = false;
             if ($_POST['tags']) {
@@ -72,9 +67,23 @@
                 }
             }
             // 验证权限
-            $stmt = $db->query('SELECT id FROM posts WHERE id = ' . $_POST['id'] . ' AND uid = ' . $uid);
-            if (!$stmt->fetch(PDO::FETCH_COLUMN)) {
+            $post = $db->query('SELECT id, external_post FROM posts WHERE id = ' . $_POST['id'] . ' AND uid = ' . $uid)->fetch(PDO::FETCH_OBJ);
+            if (!$post) {
                 throw new InvalidArgumentException('you can only edit your own post');
+            }
+            // content
+            $len = strlen($_POST['content']);
+            if ($post->external_post) {
+                if ($len > 1000) {
+                    throw new InvalidArgumentException('external post url too long');
+                }
+                if (!preg_match('#^https?://[^"]+$#', $_POST['content'])) {
+                    throw new InvalidArgumentException('invalid external post url');
+                }
+            } else {
+                if ($len > 64000) {
+                    throw new InvalidArgumentException('content maxlength is 64000');
+                }
             }
         } catch (InvalidArgumentException $e) {
             $error = '参数不对';
@@ -167,7 +176,7 @@
         if (!$id) {
             throw new InvalidArgumentException('invalid id');
         }
-        $post = $db->query("SELECT category, title, content FROM posts WHERE id = $id AND uid = $uid")->fetch(PDO::FETCH_OBJ);
+        $post = $db->query("SELECT category, title, content, external_post FROM posts WHERE id = $id AND uid = $uid")->fetch(PDO::FETCH_OBJ);
         if (!$post) {
             throw new InvalidArgumentException('post not exist');
         }
@@ -198,9 +207,14 @@
         ?>
     </select>
     <input type="text" name="title" placeholder="标题" class="block mar-btm" value="<?php echo htmlspecialchars($post->title); ?>">
+    <?php if ($post->external_post): ?>
+    <label class="block mar-btm">外部文章</label>
+    <input type="text" name="content" placeholder="http(s)://" value="<?php echo $post->content; ?>">
+    <?php else: ?>
     <div id="editormd">
         <textarea name="content" class="hide"><?php echo htmlspecialchars($post->content); ?></textarea>
     </div>
+    <?php endif; ?>
     <p>多个标签使用,号分隔,最多可打10个标签</p>
     <?php
         $stmt = $db->query("SELECT t.name FROM post_tag pt, tag t WHERE pt.post_id = $id AND pt.tag_id = t.id ORDER BY pt.id ASC");
@@ -211,6 +225,7 @@
     <button type="submit">提交</button>
 </form>
 
+<?php if ($post->external_post): ?>
 <script src="../jquery-3.0.0.min.js"></script>
 <script src="../editormd/editormd.min.js"></script>
 <script>
@@ -230,5 +245,6 @@
         imageUploadURL: 'upload.php'
     });
 </script>
+<?php endif; ?>
 
 <?php include __DIR__ . '/footer.php'; ?>

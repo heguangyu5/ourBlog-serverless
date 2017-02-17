@@ -11,12 +11,17 @@
         }
 
         include __DIR__ . '/db.php';
-        $post = $db->query("SELECT title, content FROM posts WHERE id = $id")->fetch(PDO::FETCH_OBJ);
+        $post = $db->query("SELECT title, content, external_post FROM posts WHERE id = $id")->fetch(PDO::FETCH_OBJ);
         if (!$post) {
             throw new InvalidArgumentException('post not exist');
         }
     } catch (InvalidArgumentException $e) {
         header('Location: ./index.php');
+        exit;
+    }
+
+    if ($post->external_post) {
+        header('Location: ' . $post->content);
         exit;
     }
 
