@@ -1,3 +1,4 @@
 #!/bin/bash
 
-phpunit --group InitDbTables
+phpunit --testsuite BaseDbTables
+phpunit --testsuite OurBlog

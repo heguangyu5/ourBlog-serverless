@@ -1,5 +1,7 @@
 <?php
 
+include __DIR__ . '/../lib/OurBlog/Auth.php';
+
 class OurBlog_DbUnit_ArrayDataSet extends PHPUnit_Extensions_Database_DataSet_AbstractDataSet
 {
     protected $tables = array();
@@ -39,18 +41,27 @@ class OurBlog_DbUnit_ArrayDataSet extends PHPUnit_Extensions_Database_DataSet_Ab
 
 abstract class OurBlog_DatabaseTestCase extends PHPUnit_Extensions_Database_TestCase
 {
+    protected static $pdo;
     protected static $connection;
 
-    public function getConnection()
+    public static function getDb()
     {
-        if (self::$connection == null) {
-            $pdo = new PDO(
+        if (!self::$pdo) {
+            self::$pdo = new PDO(
                 'mysql:host=localhost;port=3306;dbname=ourblog_test;charset=utf8',
                 'root',
                 '123456'
             );
-            $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            self::$connection = $this->createDefaultDBConnection($pdo, 'ourblog_test');
+            self::$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        }
+
+        return self::$pdo;
+    }
+
+    public function getConnection()
+    {
+        if (!self::$connection) {
+            self::$connection = $this->createDefaultDBConnection(self::getDb(), 'ourblog_test');
         }
         return self::$connection;
     }

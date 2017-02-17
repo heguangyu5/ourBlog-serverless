@@ -7,4 +7,12 @@
             <directory>BaseDbTables</directory>
         </testsuite>
     </testsuites>
+    <filter>
+        <whitelist processUncoveredFilesFromWhitelist="true">
+            <directory>../lib/</directory>
+        </whitelist>
+    </filter>
+    <logging>
+        <log type="coverage-html" target="report"/>
+    </logging>
 </phpunit>
