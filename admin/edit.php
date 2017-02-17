@@ -225,7 +225,7 @@
     <button type="submit">提交</button>
 </form>
 
-<?php if ($post->external_post): ?>
+<?php if (!$post->external_post): ?>
 <script src="../jquery-3.0.0.min.js"></script>
 <script src="../editormd/editormd.min.js"></script>
 <script>
