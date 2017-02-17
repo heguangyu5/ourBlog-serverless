@@ -30,6 +30,7 @@
 ?>
 
 <link rel="stylesheet" href="editormd/editormd.preview.min.css">
+<link rel="stylesheet" href="../editormd/editormd.preview.overwrite.css">
 
 <div class="text-lft">
     <div id="editormd">

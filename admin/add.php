@@ -146,6 +146,7 @@
 ?>
 
 <link rel="stylesheet" href="../editormd/editormd.min.css">
+<link rel="stylesheet" href="../editormd/editormd.preview.overwrite.css">
 
 <form method="POST" class="text-lft">
     <select name="category" class="block mar-btm">

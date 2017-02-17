@@ -194,6 +194,7 @@
 ?>
 
 <link rel="stylesheet" href="../editormd/editormd.min.css">
+<link rel="stylesheet" href="../editormd/editormd.preview.overwrite.css">
 
 <form method="POST" class="text-lft">
     <input type="hidden" name="id" value="<?php echo $id; ?>">
