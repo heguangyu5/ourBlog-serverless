@@ -6,13 +6,20 @@
     if ($_POST) {
         include __DIR__ . '/prevent-csrf.php';
         try {
-            $requiredKeys = array('id', 'category', 'title', 'content');
-            foreach ($requiredKeys as $key) {
+            $requiredKeys = array(
+                // key => required
+                'id'       => true,
+                'category' => true,
+                'title'    => true,
+                'content'  => true,
+                'tags'     => false
+            );
+            foreach ($requiredKeys as $key => $required) {
                 if (!isset($_POST[$key])) {
                     throw new InvalidArgumentException("missing required key $key");
                 }
                 $_POST[$key] = trim($_POST[$key]);
-                if (empty($_POST[$key])) {
+                if ($required && empty($_POST[$key])) {
                     throw new InvalidArgumentException("$key required");
                 }
             }
@@ -40,23 +47,107 @@
             if ($len > 64000) {
                 throw new InvalidArgumentException('content maxlength is 64000');
             }
+            // tags
+            $hasTag = false;
+            if ($_POST['tags']) {
+                $len = mb_strlen($_POST['tags']);
+                if ($len > 600) {
+                    throw new InvalidArgumentException('tags too long');
+                }
+                $tags     = explode(',', $_POST['tags']);
+                $tagIdMap = array();
+                foreach ($tags as $idx => $tag) {
+                    $tag = trim($tag);
+                    $len = mb_strlen($tag, 'UTF-8');
+                    if ($len > 50) {
+                        throw new InvalidArgumentException('tag too long');
+                    }
+                    if ($len == 0) {
+                        continue;
+                    }
+                    $tagIdMap[$tag] = 0;
+                }
+                if ($tagIdMap) {
+                    $hasTag = true;
+                }
+            }
+            // 验证权限
+            $stmt = $db->query('SELECT id FROM posts WHERE id = ' . $_POST['id'] . ' AND uid = ' . $uid);
+            if (!$stmt->fetch(PDO::FETCH_COLUMN)) {
+                throw new InvalidArgumentException('you can only edit your own post');
+            }
         } catch (InvalidArgumentException $e) {
             $error = '参数不对';
         }
 
         if (!$error) {
+            if ($hasTag) {
+                $tagsCount = count($tagIdMap);
+                $stmt      = $db->prepare('SELECT id, name FROM tag WHERE name IN (?' . str_repeat(', ?', $tagsCount - 1) . ')');
+                $stmt->execute(array_keys($tagIdMap));
+                $tagRows = $stmt->fetchAll(PDO::FETCH_OBJ);
+                foreach ($tagRows as $row) {
+                    $tagIdMap[$row->name] = $row->id;
+                }
+                $newTags = array();
+                $tagIds  = array();
+                foreach ($tagIdMap as $tag => $tagId) {
+                    if ($tagId) {
+                        $tagIds[] = $tagId;
+                    } else {
+                        $newTags[] = $tag;
+                    }
+                }
+                // 取得post原有的tag
+                $stmt = $db->query('SELECT tag_id FROM post_tag WHERE post_id = ' . $_POST['id']);
+                $postTagIds = $stmt->fetchAll(PDO::FETCH_COLUMN);
+                // diff
+                $tagIdsToBeAdded   = array_diff($tagIds, $postTagIds);
+                $tagIdsToBeDeleted = array_diff($postTagIds, $tagIds);
+            }
             $updateDate = date('Y-m-d H:i:s');
+
+            $db->beginTransaction();
             try {
-                $stmt = $db->prepare("UPDATE posts SET category = ?, title = ?, content = ?, update_date = ? WHERE id = ? AND uid = ?");
+                // post
+                $stmt = $db->prepare("UPDATE posts SET category = ?, title = ?, content = ?, update_date = ? WHERE id = ?");
                 $stmt->execute(array(
                     $_POST['category'],
                     $_POST['title'],
                     $_POST['content'],
                     $updateDate,
-                    $_POST['id'],
-                    $uid
+                    $_POST['id']
                 ));
+                // tag
+                if ($hasTag) {
+                    // newTags
+                    if ($newTags) {
+                        $stmtTag     = $db->prepare('INSERT INTO tag(name) VALUES (?)');
+                        $stmtPostTag = $db->prepare('INSERT INTO post_tag(post_id, tag_id) VALUES (?, ?)');
+                        foreach ($newTags as $tag) {
+                            $stmtTag->execute(array($tag));
+                            $stmtPostTag->execute(array($_POST['id'], $db->lastInsertId()));
+                        }
+                    }
+                    // toBeAdded
+                    if ($tagIdsToBeAdded) {
+                        if (!$newTags) {
+                            $stmtPostTag = $db->prepare('INSERT INTO post_tag(post_id, tag_id) VALUES (?, ?)');
+                        }
+                        foreach ($tagIdsToBeAdded as $tagId) {
+                            $stmtPostTag->execute(array($_POST['id'], $tagId));
+                        }
+                    }
+                    // toBeDeleted
+                    if ($tagIdsToBeDeleted) {
+                        $db->exec('DELETE FROM post_tag WHERE post_id = ' . $_POST['id'] . ' AND tag_id IN (' . implode(',', $tagIdsToBeDeleted) . ')');
+                    }
+                } else {
+                    $db->exec('DELETE FROM post_tag WHERE post_id = ' . $_POST['id']);
+                }
+                $db->commit();
             } catch (Exception $e) {
+                $db->rollBack();
                 $error = 'Server Error';
             }
             if (!$error) {
@@ -110,6 +201,13 @@
     <div id="editormd">
         <textarea name="content" class="hide"><?php echo htmlspecialchars($post->content); ?></textarea>
     </div>
+    <p>多个标签使用,号分隔,最多可打10个标签</p>
+    <?php
+        $stmt = $db->query("SELECT t.name FROM post_tag pt, tag t WHERE pt.post_id = $id AND pt.tag_id = t.id ORDER BY pt.id ASC");
+        $tags = $stmt->fetchAll(PDO::FETCH_COLUMN);
+        $tags = implode(',', $tags);
+    ?>
+    <input type="text" name="tags" placeholder="标签" class="block mar-btm" value="<?php echo htmlspecialchars($tags); ?>">
     <button type="submit">提交</button>
 </form>
 

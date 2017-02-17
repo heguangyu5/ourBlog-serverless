@@ -6,13 +6,19 @@
     if ($_POST) {
         include __DIR__ . '/prevent-csrf.php';
         try {
-            $requiredKeys = array('category', 'title', 'content');
-            foreach ($requiredKeys as $key) {
+            $requiredKeys = array(
+                // key => required
+                'category' => true,
+                'title'    => true,
+                'content'  => true,
+                'tags'     => false
+            );
+            foreach ($requiredKeys as $key => $required) {
                 if (!isset($_POST[$key])) {
                     throw new InvalidArgumentException("missing required key $key");
                 }
                 $_POST[$key] = trim($_POST[$key]);
-                if (empty($_POST[$key])) {
+                if ($required && empty($_POST[$key])) {
                     throw new InvalidArgumentException("$key required");
                 }
             }
@@ -33,13 +39,55 @@
             if ($len > 64000) {
                 throw new InvalidArgumentException('content maxlength is 64000');
             }
+            // tags
+            $hasTag = false;
+            if ($_POST['tags']) {
+                $len = mb_strlen($_POST['tags']);
+                if ($len > 600) {
+                    throw new InvalidArgumentException('tags too long');
+                }
+                $tags     = explode(',', $_POST['tags']);
+                $tagIdMap = array();
+                foreach ($tags as $idx => $tag) {
+                    $tag = trim($tag);
+                    $len = mb_strlen($tag, 'UTF-8');
+                    if ($len > 50) {
+                        throw new InvalidArgumentException('tag too long');
+                    }
+                    if ($len == 0) {
+                        continue;
+                    }
+                    $tagIdMap[$tag] = 0;
+                }
+                if ($tagIdMap) {
+                    $hasTag = true;
+                }
+            }
         } catch (InvalidArgumentException $e) {
             $error = '参数不对';
         }
 
         if (!$error) {
+            if ($hasTag) {
+                $tagsCount = count($tagIdMap);
+                $stmt      = $db->prepare('SELECT id, name FROM tag WHERE name IN (?' . str_repeat(', ?', $tagsCount - 1) . ')');
+                $stmt->execute(array_keys($tagIdMap));
+                $tagRows = $stmt->fetchAll(PDO::FETCH_OBJ);
+                foreach ($tagRows as $row) {
+                    $tagIdMap[$row->name] = $row->id;
+                }
+                $newTags = array();
+                foreach ($tagIdMap as $tag => $tagId) {
+                    if (!$tagId) {
+                        $newTags[] = $tag;
+                    }
+                }
+            }
             $createDate = date('Y-m-d H:i:s');
+
+            $db->beginTransaction();
             try {
+                // post
                 $stmt = $db->prepare('INSERT INTO posts(uid, category, title, content, create_date, update_date) VALUES (?, ?, ?, ?, ?, ?)');
                 $stmt->execute(array(
                     $uid,
@@ -49,7 +97,26 @@
                     $createDate,
                     $createDate
                 ));
+                // tags
+                if ($hasTag) {
+                    $postId = $db->lastInsertId();
+                    // tag
+                    if ($newTags) {
+                        $stmt = $db->prepare('INSERT INTO tag(name) VALUES (?)');
+                        foreach ($newTags as $tag) {
+                            $stmt->execute(array($tag));
+                            $tagIdMap[$tag] = $db->lastInsertId();
+                        }
+                    }
+                    // post_tag
+                    $stmt = $db->prepare('INSERT INTO post_tag(post_id, tag_id) VALUES (?, ?)');
+                    foreach ($tagIdMap as $tagId) {
+                        $stmt->execute(array($postId, $tagId));
+                    }
+                }
+                $db->commit();
             } catch (Exception $e) {
+                $db->rollBack();
                 $error = 'Server Error';
             }
             if (!$error) {
@@ -83,6 +150,8 @@
     <div id="editormd">
         <textarea name="content" class="hide"></textarea>
     </div>
+    <p>多个标签使用,号分隔,最多可打10个标签</p>
+    <input type="text" name="tags" placeholder="标签" class="block mar-btm">
     <button type="submit">提交</button>
 </form>
 
