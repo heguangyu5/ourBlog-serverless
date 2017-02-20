@@ -25,5 +25,10 @@ return array(
 2. TDD/PHPUnit 用时1周
 3. Zend Framework 用时1周'
         )
+    ),
+    'tag' => array(
+        array('id' => 1, 'name' => 'PHP'),
+        array('id' => 2, 'name' => 'Linux'),
+        array('id' => 3, 'name' => 'MySQL')
     )
 );
