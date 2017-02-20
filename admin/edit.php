@@ -5,164 +5,17 @@
     $error = false;
     if ($_POST) {
         include __DIR__ . '/prevent-csrf.php';
+        include __DIR__ . '/../lib/OurBlog/Util.php';
+        include __DIR__ . '/../lib/OurBlog/Post.php';
         try {
-            $requiredKeys = array(
-                // key => required
-                'id'       => true,
-                'category' => true,
-                'title'    => true,
-                'content'  => true,
-                'tags'     => false
-            );
-            foreach ($requiredKeys as $key => $required) {
-                if (!isset($_POST[$key])) {
-                    throw new InvalidArgumentException("missing required key $key");
-                }
-                $_POST[$key] = trim($_POST[$key]);
-                if ($required && empty($_POST[$key])) {
-                    throw new InvalidArgumentException("$key required");
-                }
-            }
-            // id
-            $_POST['id'] = filter_var($_POST['id'], FILTER_VALIDATE_INT, array(
-                'options' => array('min_range' => 1)
-            ));
-            if (!$_POST['id']) {
-                throw new InvalidArgumentException('invalid id');
-            }
-            // category
-            $_POST['category'] = filter_var($_POST['category'], FILTER_VALIDATE_INT, array(
-                'options' => array('min_range' => 1)
-            ));
-            if (!$_POST['category']) {
-                throw new InvalidArgumentException('invalid category');
-            }
-            // title
-            $len = mb_strlen($_POST['title'], 'UTF-8');
-            if ($len > 500) {
-                throw new InvalidArgumentException('title maxlength is 500');
-            }
-            // tags
-            $hasTag = false;
-            if ($_POST['tags']) {
-                $len = mb_strlen($_POST['tags']);
-                if ($len > 600) {
-                    throw new InvalidArgumentException('tags too long');
-                }
-                $tags     = explode(',', $_POST['tags']);
-                $tagIdMap = array();
-                foreach ($tags as $idx => $tag) {
-                    $tag = trim($tag);
-                    $len = mb_strlen($tag, 'UTF-8');
-                    if ($len > 50) {
-                        throw new InvalidArgumentException('tag too long');
-                    }
-                    if ($len == 0) {
-                        continue;
-                    }
-                    $tagIdMap[$tag] = 0;
-                }
-                if ($tagIdMap) {
-                    $hasTag = true;
-                }
-            }
-            // 验证权限
-            $post = $db->query('SELECT id, external_post FROM posts WHERE id = ' . $_POST['id'] . ' AND uid = ' . $uid)->fetch(PDO::FETCH_OBJ);
-            if (!$post) {
-                throw new InvalidArgumentException('you can only edit your own post');
-            }
-            // content
-            $len = strlen($_POST['content']);
-            if ($post->external_post) {
-                if ($len > 1000) {
-                    throw new InvalidArgumentException('external post url too long');
-                }
-                if (!preg_match('#^https?://[^"]+$#', $_POST['content'])) {
-                    throw new InvalidArgumentException('invalid external post url');
-                }
-            } else {
-                if ($len > 64000) {
-                    throw new InvalidArgumentException('content maxlength is 64000');
-                }
-            }
+            $post = new OurBlog_Post($db, $uid);
+            $post->edit($_POST);
+            header('Location: ./index.php');
+            exit;
         } catch (InvalidArgumentException $e) {
             $error = '参数不对';
-        }
-
-        if (!$error) {
-            if ($hasTag) {
-                $tagsCount = count($tagIdMap);
-                $stmt      = $db->prepare('SELECT id, name FROM tag WHERE name IN (?' . str_repeat(', ?', $tagsCount - 1) . ')');
-                $stmt->execute(array_keys($tagIdMap));
-                $tagRows = $stmt->fetchAll(PDO::FETCH_OBJ);
-                foreach ($tagRows as $row) {
-                    $tagIdMap[$row->name] = $row->id;
-                }
-                $newTags = array();
-                $tagIds  = array();
-                foreach ($tagIdMap as $tag => $tagId) {
-                    if ($tagId) {
-                        $tagIds[] = $tagId;
-                    } else {
-                        $newTags[] = $tag;
-                    }
-                }
-                // 取得post原有的tag
-                $stmt = $db->query('SELECT tag_id FROM post_tag WHERE post_id = ' . $_POST['id']);
-                $postTagIds = $stmt->fetchAll(PDO::FETCH_COLUMN);
-                // diff
-                $tagIdsToBeAdded   = array_diff($tagIds, $postTagIds);
-                $tagIdsToBeDeleted = array_diff($postTagIds, $tagIds);
-            }
-            $updateDate = date('Y-m-d H:i:s');
-
-            $db->beginTransaction();
-            try {
-                // post
-                $stmt = $db->prepare("UPDATE posts SET category = ?, title = ?, content = ?, update_date = ? WHERE id = ?");
-                $stmt->execute(array(
-                    $_POST['category'],
-                    $_POST['title'],
-                    $_POST['content'],
-                    $updateDate,
-                    $_POST['id']
-                ));
-                // tag
-                if ($hasTag) {
-                    // newTags
-                    if ($newTags) {
-                        $stmtTag     = $db->prepare('INSERT INTO tag(name) VALUES (?)');
-                        $stmtPostTag = $db->prepare('INSERT INTO post_tag(post_id, tag_id) VALUES (?, ?)');
-                        foreach ($newTags as $tag) {
-                            $stmtTag->execute(array($tag));
-                            $stmtPostTag->execute(array($_POST['id'], $db->lastInsertId()));
-                        }
-                    }
-                    // toBeAdded
-                    if ($tagIdsToBeAdded) {
-                        if (!$newTags) {
-                            $stmtPostTag = $db->prepare('INSERT INTO post_tag(post_id, tag_id) VALUES (?, ?)');
-                        }
-                        foreach ($tagIdsToBeAdded as $tagId) {
-                            $stmtPostTag->execute(array($_POST['id'], $tagId));
-                        }
-                    }
-                    // toBeDeleted
-                    if ($tagIdsToBeDeleted) {
-                        $db->exec('DELETE FROM post_tag WHERE post_id = ' . $_POST['id'] . ' AND tag_id IN (' . implode(',', $tagIdsToBeDeleted) . ')');
-                    }
-                } else {
-                    $db->exec('DELETE FROM post_tag WHERE post_id = ' . $_POST['id']);
-                }
-                $db->commit();
-            } catch (Exception $e) {
-                $db->rollBack();
-                $error = 'Server Error';
-            }
-            if (!$error) {
-                header('Location: ./index.php');
-                exit;
-            }
+        } catch (Exception $e) {
+            $error = 'Server Error';
         }
     }
 

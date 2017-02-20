@@ -8,47 +8,24 @@
     $error = false;
     if ($_POST) {
         include __DIR__ . '/prevent-csrf.php';
+        include __DIR__ . '/../db.php';
+        include __DIR__ . '/../lib/OurBlog/Util.php';
+        include __DIR__ . '/../lib/OurBlog/Auth.php';
         try {
-            $requiredKeys = array('email', 'password');
-            foreach ($requiredKeys as $key) {
-                if (!isset($_POST[$key])) {
-                    throw new InvalidArgumentException("missing required key $key");
-                }
-            }
-            // email
-            $len = strlen($_POST['email']);
-            if ($len < 5 || $len > 200) {
-                throw new InvalidArgumentException('invalid email, length limit 5~200');
-            }
-            $_POST['email'] = filter_var($_POST['email'], FILTER_VALIDATE_EMAIL);
-            if (!$_POST['email']) {
-                throw new InvalidArgumentException('email format wrong');
-            }
-            // password
-            $len = strlen($_POST['password']);
-            if ($len < 6 || $len > 50) {
-                throw new InvalidArgumentException('invalid password, length limit 6~50');
-            }
-        } catch (InvalidArgumentException $e) {
-            $error = '参数不对';
-        }
-
-        if (!$error) {
-            $salt = 'EYFXOEII/T3Y/75D0pUXbz5bqxVIpo7qMipQ7MtnPaUHIvX1nDKgU6KfLf9JpYAvjO7dacpgt8C/';
-            $_POST['password'] = md5($salt . '-' . $_POST['password']);
-            // login
-            include __DIR__ . '/../db.php';
-            $stmt = $db->prepare('SELECT uid FROM user WHERE email = ? AND password = ?');
-            $stmt->execute(array($_POST['email'], $_POST['password']));
-            $uid  = $stmt->fetchColumn();
+            $auth  = new OurBlog_Auth($db);
+            $uid   = $auth->authenticate(OurBlog_Util::getPost('email'), OurBlog_Util::getPost('password'));
             if ($uid) {
                 session_regenerate_id(true);
-                $_SESSION['uid'] = $uid;
+                $_SESSION['uid']   = $uid;
                 $_SESSION['email'] = $_POST['email'];
                 header('Location: ./index.php');
                 exit;
             }
             $error = '用户名或密码不对';
+        } catch (InvalidArgumentException $e) {
+            $error = '参数不对';
+        } catch (Exception $e) {
+            $error = 'Server Error';
         }
     }
 ?>

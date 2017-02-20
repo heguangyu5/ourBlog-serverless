@@ -5,135 +5,17 @@
     $error = false;
     if ($_POST) {
         include __DIR__ . '/prevent-csrf.php';
+        include __DIR__ . '/../lib/OurBlog/Util.php';
+        include __DIR__ . '/../lib/OurBlog/Post.php';
         try {
-            $requiredKeys = array(
-                // key => required
-                'category' => true,
-                'title'    => true,
-                'content'  => true,
-                'tags'     => false
-            );
-            foreach ($requiredKeys as $key => $required) {
-                if (!isset($_POST[$key])) {
-                    throw new InvalidArgumentException("missing required key $key");
-                }
-                $_POST[$key] = trim($_POST[$key]);
-                if ($required && empty($_POST[$key])) {
-                    throw new InvalidArgumentException("$key required");
-                }
-            }
-            // category
-            $_POST['category'] = filter_var($_POST['category'], FILTER_VALIDATE_INT, array(
-                'options' => array('min_range' => 1)
-            ));
-            if (!$_POST['category']) {
-                throw new InvalidArgumentException('invalid category');
-            }
-            // title
-            $len = mb_strlen($_POST['title'], 'UTF-8');
-            if ($len > 500) {
-                throw new InvalidArgumentException('title maxlength is 500');
-            }
-            // content
-            $len = strlen($_POST['content']);
-            if (isset($_POST['external-post']) && $_POST['external-post'] == '1') {
-                if ($len > 1000) {
-                    throw new InvalidArgumentException('external post url too long');
-                }
-                if (!preg_match('#^https?://[^"]+$#', $_POST['content'])) {
-                    throw new InvalidArgumentException('invalid external post url');
-                }
-            } else {
-                if ($len > 64000) {
-                    throw new InvalidArgumentException('content maxlength is 64000');
-                }
-                $_POST['external-post'] = 0;
-            }
-            // tags
-            $hasTag = false;
-            if ($_POST['tags']) {
-                $len = mb_strlen($_POST['tags']);
-                if ($len > 600) {
-                    throw new InvalidArgumentException('tags too long');
-                }
-                $tags     = explode(',', $_POST['tags']);
-                $tagIdMap = array();
-                foreach ($tags as $idx => $tag) {
-                    $tag = trim($tag);
-                    $len = mb_strlen($tag, 'UTF-8');
-                    if ($len > 50) {
-                        throw new InvalidArgumentException('tag too long');
-                    }
-                    if ($len == 0) {
-                        continue;
-                    }
-                    $tagIdMap[$tag] = 0;
-                }
-                if ($tagIdMap) {
-                    $hasTag = true;
-                }
-            }
+            $post = new OurBlog_Post($db, $uid);
+            $post->add($_POST);
+            header('Location: ./index.php');
+            exit;
         } catch (InvalidArgumentException $e) {
             $error = '参数不对';
-        }
-
-        if (!$error) {
-            if ($hasTag) {
-                $tagsCount = count($tagIdMap);
-                $stmt      = $db->prepare('SELECT id, name FROM tag WHERE name IN (?' . str_repeat(', ?', $tagsCount - 1) . ')');
-                $stmt->execute(array_keys($tagIdMap));
-                $tagRows = $stmt->fetchAll(PDO::FETCH_OBJ);
-                foreach ($tagRows as $row) {
-                    $tagIdMap[$row->name] = $row->id;
-                }
-                $newTags = array();
-                foreach ($tagIdMap as $tag => $tagId) {
-                    if (!$tagId) {
-                        $newTags[] = $tag;
-                    }
-                }
-            }
-            $createDate = date('Y-m-d H:i:s');
-
-            $db->beginTransaction();
-            try {
-                // post
-                $stmt = $db->prepare('INSERT INTO posts(uid, category, title, content, external_post, create_date, update_date) VALUES (?, ?, ?, ?, ?, ?, ?)');
-                $stmt->execute(array(
-                    $uid,
-                    $_POST['category'],
-                    $_POST['title'],
-                    $_POST['content'],
-                    $_POST['external-post'],
-                    $createDate,
-                    $createDate
-                ));
-                // tags
-                if ($hasTag) {
-                    $postId = $db->lastInsertId();
-                    // tag
-                    if ($newTags) {
-                        $stmt = $db->prepare('INSERT INTO tag(name) VALUES (?)');
-                        foreach ($newTags as $tag) {
-                            $stmt->execute(array($tag));
-                            $tagIdMap[$tag] = $db->lastInsertId();
-                        }
-                    }
-                    // post_tag
-                    $stmt = $db->prepare('INSERT INTO post_tag(post_id, tag_id) VALUES (?, ?)');
-                    foreach ($tagIdMap as $tagId) {
-                        $stmt->execute(array($postId, $tagId));
-                    }
-                }
-                $db->commit();
-            } catch (Exception $e) {
-                $db->rollBack();
-                $error = 'Server Error';
-            }
-            if (!$error) {
-                header('Location: ./index.php');
-                exit;
-            }
+        } catch (Exception $e) {
+            $error = 'Server Error';
         }
     }
 
@@ -159,8 +41,8 @@
         ?>
     </select>
     <input type="text" name="title" placeholder="标题" class="block mar-btm">
-    <label class="block mar-btm"><input type="checkbox" name="external-post" id="external-post" style="width:auto" value="1"> 外部文章</label>
-    <input type="hidden" id="external-post-url" placeholder="http(s)://" value="http://">
+    <label class="block mar-btm"><input type="checkbox" name="externalPost" id="externalPost" style="width:auto" value="1"> 外部文章</label>
+    <input type="hidden" id="externalPostUrl" placeholder="http(s)://" value="http://">
     <div id="editormd">
         <textarea name="content" class="hide"></textarea>
     </div>
@@ -187,13 +69,13 @@
         imageFormats: ['jpg', 'png', 'gif', 'zip'],
         imageUploadURL: 'upload.php'
     });
-    $('#external-post').click(function () {
+    $('#externalPost').click(function () {
         if ($(this).prop('checked')) {
             $('#editormd').hide();
             $('#editormd > textarea').removeAttr('name');
-            $('#external-post-url').attr('type', 'text').attr('name', 'content');
+            $('#externalPostUrl').attr('type', 'text').attr('name', 'content');
         } else {
-            $('#external-post-url').attr('type', 'hidden').removeAttr('name');
+            $('#externalPostUrl').attr('type', 'hidden').removeAttr('name');
             $('#editormd > textarea').attr('name', 'content');
             $('#editormd').show();
         }
