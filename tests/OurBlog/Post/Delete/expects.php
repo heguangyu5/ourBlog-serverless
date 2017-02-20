@@ -18,6 +18,7 @@ return array(
 **当然这个案例是最简单的权限判断,在实际应用中往往要比这复杂得多.**
 
 ![](/uploads/1/screencapture-v2ex-t-336226-1486605040878.png)',
+            'external_post' => 0,
             'create_date' => '2017-02-17 17:35:00',
             'update_date' => '2017-02-17 17:35:00'
         )

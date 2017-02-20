@@ -23,7 +23,8 @@ return array(
 
 1. 开发blog 用时1周
 2. TDD/PHPUnit 用时1周
-3. Zend Framework 用时1周'
+3. Zend Framework 用时1周',
+            'external_post' => 0
         )
     ),
     'tag' => array(

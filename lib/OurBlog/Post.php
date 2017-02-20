@@ -41,8 +41,18 @@ class OurBlog_Post
         }
         // content
         $len = strlen($data['content']);
-        if ($len > 64000) {
-            throw new InvalidArgumentException('content maxlength is 64000');
+        if (isset($data['externalPost']) && $data['externalPost'] == '1') {
+            if ($len > 1000) {
+                throw new InvalidArgumentException('external post url too long');
+            }
+            if (!preg_match('#^https?://[^"]+$#', $data['content'])) {
+                throw new InvalidArgumentException('invalid external post url');
+            }
+        } else {
+            if ($len > 64000) {
+                throw new InvalidArgumentException('content maxlength is 64000');
+            }
+            $data['externalPost'] = 0;
         }
         // tags
         if ($data['tags']) {
@@ -99,12 +109,13 @@ class OurBlog_Post
         $this->db->beginTransaction();
         try {
             // post
-            $stmt = $this->db->prepare('INSERT INTO posts(uid, category, title, content, create_date, update_date) VALUES (?, ?, ?, ?, ?, ?)');
+            $stmt = $this->db->prepare('INSERT INTO posts(uid, category, title, content, external_post, create_date, update_date) VALUES (?, ?, ?, ?, ?, ?, ?)');
             $stmt->execute(array(
                 $this->uid,
                 $data['category'],
                 $data['title'],
                 $data['content'],
+                $data['externalPost'],
                 $createDate,
                 $createDate
             ));
@@ -142,13 +153,14 @@ class OurBlog_Post
             throw new InvalidArgumentException('invalid id');
         }
 
-        $data = $this->preparePostData($data);
-
-        // 验证权限
-        $stmt = $this->db->query('SELECT id FROM posts WHERE id = ' . $data['id'] . ' AND uid = ' . $this->uid);
-        if (!$stmt->fetch(PDO::FETCH_COLUMN)) {
+        $stmt = $this->db->query('SELECT id, external_post FROM posts WHERE id = ' . $data['id'] . ' AND uid = ' . $this->uid);
+        $post = $stmt->fetch(PDO::FETCH_OBJ);
+        if (!$post) {
             throw new InvalidArgumentException('you can only edit your own post');
         }
+
+        $data['externalPost'] = $post->external_post;
+        $data = $this->preparePostData($data);
 
         return $data;
     }

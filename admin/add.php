@@ -40,6 +40,8 @@
         ?>
     </select>
     <input type="text" name="title" placeholder="标题" class="block mar-btm">
+    <label class="block mar-btm"><input type="checkbox" name="externalPost" id="externalPost" style="width:auto" value="1"> 外部文章</label>
+    <input type="hidden" id="externalPostUrl" placeholder="http(s)://" value="http://">
     <div id="editormd">
         <textarea name="content" class="hide"></textarea>
     </div>
@@ -65,6 +67,17 @@
         imageUpload: true,
         imageFormats: ['jpg', 'png', 'gif', 'zip'],
         imageUploadURL: 'upload.php'
+    });
+    $('#externalPost').click(function () {
+        if ($(this).prop('checked')) {
+            $('#editormd').hide();
+            $('#editormd > textarea').removeAttr('name');
+            $('#externalPostUrl').attr('type', 'text').attr('name', 'content');
+        } else {
+            $('#externalPostUrl').attr('type', 'hidden').removeAttr('name');
+            $('#editormd > textarea').attr('name', 'content');
+            $('#editormd').show();
+        }
     });
 </script>
 
