@@ -21,5 +21,13 @@ return array(
             'create_date' => '2017-02-17 17:35:00',
             'update_date' => '2017-02-17 17:35:00'
         )
+    ),
+    'tag'      => array(
+        array('id' => 1, 'name' => 'PHP'),
+        array('id' => 2, 'name' => 'Linux'),
+        array('id' => 3, 'name' => 'MySQL')
+    ),
+    'post_tag' => array(
+        array('id' => 3, 'post_id' => 2, 'tag_id' => 2)
     )
 );

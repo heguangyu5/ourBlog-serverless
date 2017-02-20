@@ -225,7 +225,19 @@ class OurBlog_Post
         if (!$id) {
             throw new InvalidArgumentException('invalid id');
         }
+        $stmt = $this->db->query("SELECT id FROM posts WHERE id = $id AND uid = " . $this->uid);
+        if (!$stmt->fetch(PDO::FETCH_COLUMN)) {
+            throw new InvalidArgumentException('you can only delete your own post');
+        }
 
-        $this->db->exec("DELETE FROM posts WHERE id = $id AND uid = " . $this->uid);
+        $this->db->beginTransaction();
+        try {
+            $this->db->exec("DELETE FROM posts WHERE id = $id");
+            $this->db->exec("DELETE FROM post_tag WHERE post_id = $id");
+            $this->db->commit();
+        } catch (Exception $e) {
+            $this->db->rollBack();
+            throw $e;
+        }
     }
 }

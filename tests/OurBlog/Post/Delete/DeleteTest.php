@@ -37,19 +37,18 @@ class OurBlog_Post_DeleteTest extends OurBlog_DatabaseTestCase
         $post->delete(1);
 
         $expectedDataSet = $this->createArrayDataSet(include __DIR__ . '/expects.php');
-        $dataSet = $this->getConnection()->createDataSet(array('posts'));
+        $dataSet = $this->getConnection()->createDataSet(array('posts', 'tag', 'post_tag'));
 
         $this->assertDataSetsEqual($expectedDataSet, $dataSet);
     }
 
+    /**
+     * @expectedException InvalidArgumentException
+     * @expectedExceptionMessage you can only delete your own post
+     */
     public function testUserCannotDeleteOthersPost()
     {
         $post = new OurBlog_Post(OurBlog_DatabaseTestCase::getDb(), 1);
         $post->delete(2);
-
-        $expectedDataSet = $this->createArrayDataSet(include __DIR__ . '/fixtures.php');
-        $dataSet = $this->getConnection()->createDataSet(array('posts'));
-
-        $this->assertDataSetsEqual($expectedDataSet, $dataSet);
     }
 }
