@@ -5,8 +5,8 @@ return array(
         array(
             'id'       => 1,
             'uid'      => 1,
-            'category' => 1,
-            'title'    => '云招初级PHP工程师培训 - 概览',
+            'category' => 2,
+            'title'    => '云招初级PHP工程师培训 - 概览 - edit',
             'content'  => '> 本培训面向刚刚入职云招科技的初级PHP工程师.
 通过此培训的工程师才能向云招代码库提交代码.
 
@@ -23,9 +23,8 @@ return array(
 
 1. 开发blog 用时1周
 2. TDD/PHPUnit 用时1周
-3. Zend Framework 用时1周',
-            'create_date' => '2017-02-17 17:30:00',
-            'update_date' => '2017-02-17 17:30:00'
+3. Zend Framework 用时1周 - edit',
+            'create_date' => '2017-02-17 17:30:00'
         ),
         array(
             'id'       => 2,
@@ -43,8 +42,7 @@ return array(
 **当然这个案例是最简单的权限判断,在实际应用中往往要比这复杂得多.**
 
 ![](/uploads/1/screencapture-v2ex-t-336226-1486605040878.png)',
-            'create_date' => '2017-02-17 17:35:00',
-            'update_date' => '2017-02-17 17:35:00'
+            'create_date' => '2017-02-17 17:35:00'
         )
     ),
     'tag'      => array(
@@ -53,8 +51,6 @@ return array(
         array('id' => 3, 'name' => 'MySQL')
     ),
     'post_tag' => array(
-        array('id' => 1, 'post_id' => 1, 'tag_id' => 1),
-        array('id' => 2, 'post_id' => 1, 'tag_id' => 3),
         array('id' => 3, 'post_id' => 2, 'tag_id' => 2)
     )
 );

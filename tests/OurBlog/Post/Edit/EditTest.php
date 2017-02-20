@@ -56,21 +56,52 @@ class OurBlog_Post_EditTest extends OurBlog_DatabaseTestCase
 
         $expectedDataSet = $this->createArrayDataSet(include __DIR__ . '/expects.php');
 
-        $dataSet = $this->getConnection()->createDataSet(array('posts'));
+        $dataSet = $this->getConnection()->createDataSet(array('posts', 'tag', 'post_tag'));
         $filterDataSet = new PHPUnit_Extensions_Database_DataSet_DataSetFilter($dataSet);
         $filterDataSet->setExcludeColumnsForTable('posts', array('update_date'));
 
         $this->assertDataSetsEqual($expectedDataSet, $filterDataSet);
     }
 
+    /**
+     * @expectedException InvalidArgumentException
+     * @expectedExceptionMessage you can only edit your own post
+     */
     public function testUserCannotEditOthersPost()
     {
         $post = new OurBlog_Post(OurBlog_DatabaseTestCase::getDb(), 2);
         $post->edit($this->data);
+    }
 
-        $expectedDataSet = $this->createArrayDataSet(include __DIR__ . '/fixtures.php');
-        $dataSet = $this->getConnection()->createDataSet(array('posts'));
+    public function testEditPostDeleteAllTags()
+    {
+        $this->data['tags'] = '';
 
-        $this->assertDataSetsEqual($expectedDataSet, $dataSet);
+        $post = new OurBlog_Post(OurBlog_DatabaseTestCase::getDb(), 1);
+        $post->edit($this->data);
+
+        $expectedDataSet = $this->createArrayDataSet(include __DIR__ . '/expects-delete-all-tags.php');
+
+        $dataSet = $this->getConnection()->createDataSet(array('posts', 'tag', 'post_tag'));
+        $filterDataSet = new PHPUnit_Extensions_Database_DataSet_DataSetFilter($dataSet);
+        $filterDataSet->setExcludeColumnsForTable('posts', array('update_date'));
+
+        $this->assertDataSetsEqual($expectedDataSet, $filterDataSet);
+    }
+
+    public function testEditPostAddExistTags()
+    {
+        $this->data['tags'] = 'PHP,MySQL,Linux';
+
+        $post = new OurBlog_Post(OurBlog_DatabaseTestCase::getDb(), 1);
+        $post->edit($this->data);
+
+        $expectedDataSet = $this->createArrayDataSet(include __DIR__ . '/expects-add-exist-tags.php');
+
+        $dataSet = $this->getConnection()->createDataSet(array('posts', 'tag', 'post_tag'));
+        $filterDataSet = new PHPUnit_Extensions_Database_DataSet_DataSetFilter($dataSet);
+        $filterDataSet->setExcludeColumnsForTable('posts', array('update_date'));
+
+        $this->assertDataSetsEqual($expectedDataSet, $filterDataSet);
     }
 }

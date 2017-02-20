@@ -1,6 +1,6 @@
 <?php
 /**
- * @group posta
+ * @group post
  */
 class OurBlog_Post_AddTest extends OurBlog_DatabaseTestCase
 {

@@ -63,6 +63,13 @@
     <div id="editormd">
         <textarea name="content" class="hide"><?php echo htmlspecialchars($post->content); ?></textarea>
     </div>
+    <p>多个标签使用,号分隔,最多可打10个标签</p>
+    <?php
+        $stmt = $db->query("SELECT t.name FROM post_tag pt, tag t WHERE pt.post_id = $id AND pt.tag_id = t.id ORDER BY pt.id ASC");
+        $tags = $stmt->fetchAll(PDO::FETCH_COLUMN);
+        $tags = implode(',', $tags);
+    ?>
+    <input type="text" name="tags" placeholder="标签" class="block mar-btm" value="<?php echo htmlspecialchars($tags); ?>">
     <button type="submit">提交</button>
 </form>
 

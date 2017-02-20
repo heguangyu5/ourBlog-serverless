@@ -132,29 +132,91 @@ class OurBlog_Post
         }
     }
 
-    public function edit(array $data)
+    protected function prepareEditPostData(array $data)
     {
         if (!isset($data['id'])) {
             throw new InvalidArgumentException('missing required key id');
         }
-        $id = OurBlog_Util::DBAIPK($data['id']);
-        if (!$id) {
+        $data['id'] = OurBlog_Util::DBAIPK($data['id']);
+        if (!$data['id']) {
             throw new InvalidArgumentException('invalid id');
         }
 
         $data = $this->preparePostData($data);
 
+        // 验证权限
+        $stmt = $this->db->query('SELECT id FROM posts WHERE id = ' . $data['id'] . ' AND uid = ' . $this->uid);
+        if (!$stmt->fetch(PDO::FETCH_COLUMN)) {
+            throw new InvalidArgumentException('you can only edit your own post');
+        }
+
+        return $data;
+    }
+
+    public function edit(array $data)
+    {
+        $data = $this->prepareEditPostData($data);
+
+        if (isset($data['tagIdMap'])) {
+            // 取得post原有的tag
+            $stmt = $this->db->query('SELECT tag_id FROM post_tag WHERE post_id = ' . $data['id']);
+            $postTagIds = $stmt->fetchAll(PDO::FETCH_COLUMN);
+            // diff
+            $tagIds = array();
+            foreach ($data['tagIdMap'] as $tagId) {
+                if ($tagId) {
+                    $tagIds[] = $tagId;
+                }
+            }
+            $tagIdsToBeAdded   = array_diff($tagIds, $postTagIds);
+            $tagIdsToBeDeleted = array_diff($postTagIds, $tagIds);
+        }
+
         $updateDate = date('Y-m-d H:i:s');
 
-        $stmt = $this->db->prepare("UPDATE posts SET category = ?, title = ?, content = ?, update_date = ? WHERE id = ? AND uid = ?");
-        $stmt->execute(array(
-            $data['category'],
-            $data['title'],
-            $data['content'],
-            $updateDate,
-            $id,
-            $this->uid
-        ));
+        $this->db->beginTransaction();
+        try {
+            // post
+            $stmt = $this->db->prepare("UPDATE posts SET category = ?, title = ?, content = ?, update_date = ? WHERE id = ?");
+            $stmt->execute(array(
+                $data['category'],
+                $data['title'],
+                $data['content'],
+                $updateDate,
+                $data['id']
+            ));
+            // tags
+            if (isset($data['tagIdMap'])) {
+                // newTags
+                if ($data['newTags']) {
+                    $stmtTag     = $this->db->prepare('INSERT INTO tag(name) VALUES (?)');
+                    $stmtPostTag = $this->db->prepare('INSERT INTO post_tag(post_id, tag_id) VALUES (?, ?)');
+                    foreach ($data['newTags'] as $tag) {
+                        $stmtTag->execute(array($tag));
+                        $stmtPostTag->execute(array($data['id'], $this->db->lastInsertId()));
+                    }
+                }
+                // toBeAdded
+                if ($tagIdsToBeAdded) {
+                    if (!$data['newTags']) {
+                        $stmtPostTag = $this->db->prepare('INSERT INTO post_tag(post_id, tag_id) VALUES (?, ?)');
+                    }
+                    foreach ($tagIdsToBeAdded as $tagId) {
+                        $stmtPostTag->execute(array($data['id'], $tagId));
+                    }
+                }
+                // toBeDeleted
+                if ($tagIdsToBeDeleted) {
+                    $this->db->exec('DELETE FROM post_tag WHERE post_id = ' . $data['id'] . ' AND tag_id IN (' . implode(',', $tagIdsToBeDeleted) . ')');
+                }
+            } else {
+                $this->db->exec('DELETE FROM post_tag WHERE post_id = ' . $data['id']);
+            }
+            $this->db->commit();
+        } catch (Exception $e) {
+            $this->db->rollBack();
+            throw $e;
+        }
     }
 
     public function delete($id)

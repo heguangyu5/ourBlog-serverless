@@ -20,5 +20,6 @@ return array(
 
 1. 开发blog 用时1周
 2. TDD/PHPUnit 用时1周
-3. Zend Framework 用时1周 - edit'
+3. Zend Framework 用时1周 - edit',
+    'tags'     => 'PHP,Linux,Javascript'
 );
