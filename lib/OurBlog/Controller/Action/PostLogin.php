@@ -12,6 +12,7 @@ class OurBlog_Controller_Action_PostLogin extends OurBlog_Controller_Action
         }
 
         $this->uid = $auth->getIdentity();
+        $this->view->uid = $this->uid;
 
         $this->setLayout('layout-post-login');
     }
