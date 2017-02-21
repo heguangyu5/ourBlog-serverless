@@ -242,18 +242,20 @@ class OurBlog_Post
         if (!$id) {
             throw new InvalidArgumentException('invalid id');
         }
-        $stmt = $this->db->query("SELECT id FROM posts WHERE id = $id AND uid = " . $this->uid);
-        if (!$stmt->fetch(PDO::FETCH_COLUMN)) {
+
+        $db = Zend_Db_Table_Abstract::getDefaultAdapter();
+        $id = $db->fetchOne("SELECT id FROM posts WHERE id = $id AND uid = " . $this->uid);
+        if (!$id) {
             throw new InvalidArgumentException('you can only delete your own post');
         }
 
-        $this->db->beginTransaction();
+        $db->beginTransaction();
         try {
-            $this->db->exec("DELETE FROM posts WHERE id = $id");
-            $this->db->exec("DELETE FROM post_tag WHERE post_id = $id");
-            $this->db->commit();
+            $db->exec("DELETE FROM posts WHERE id = $id");
+            $db->exec("DELETE FROM post_tag WHERE post_id = $id");
+            $db->commit();
         } catch (Exception $e) {
-            $this->db->rollBack();
+            $db->rollBack();
             throw $e;
         }
     }

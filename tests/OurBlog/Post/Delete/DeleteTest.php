@@ -27,13 +27,13 @@ class OurBlog_Post_DeleteTest extends OurBlog_DatabaseTestCase
      */
     public function testIdShouldBeDBAIPK($id)
     {
-        $post = new OurBlog_Post(OurBlog_DatabaseTestCase::getDb(), 1);
+        $post = new OurBlog_Post(1);
         $post->delete($id);
     }
 
     public function testDeletePost()
     {
-        $post = new OurBlog_Post(OurBlog_DatabaseTestCase::getDb(), 1);
+        $post = new OurBlog_Post(1);
         $post->delete(1);
 
         $expectedDataSet = $this->createArrayDataSet(include __DIR__ . '/expects.php');
@@ -48,7 +48,7 @@ class OurBlog_Post_DeleteTest extends OurBlog_DatabaseTestCase
      */
     public function testUserCannotDeleteOthersPost()
     {
-        $post = new OurBlog_Post(OurBlog_DatabaseTestCase::getDb(), 1);
+        $post = new OurBlog_Post(1);
         $post->delete(2);
     }
 }

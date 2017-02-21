@@ -60,4 +60,18 @@ class AdminController extends OurBlog_Controller_Action_PostLogin
 
         $this->view->post = $post;
     }
+
+    public function deleteAction()
+    {
+        try {
+            OurBlog_Util::killCSRF();
+            $post = new OurBlog_Post($this->uid);
+            $post->delete($this->getQuery('id'));
+            $this->redirect('/admin/');
+        } catch (InvalidArgumentException $e) {
+            die('参数不对');
+        } catch (Exception $e) {
+            die('Server Error');
+        }
+    }
 }
