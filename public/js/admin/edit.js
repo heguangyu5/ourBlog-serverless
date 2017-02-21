@@ -11,7 +11,7 @@ $(document).ready(function () {
         ],
         placeholder: '正文',
         imageUpload: true,
-        imageFormats: ['jpg', 'png', 'gif', 'zip'],
-        imageUploadURL: 'upload.php'
+        imageFormats: ['jpg', 'png', 'gif', 'zip', 'tar.gz', 'doc', 'docx', 'xls', 'xlsx', 'pdf', 'md', 'txt', 'c', 'php'],
+        imageUploadURL: '/admin/upload'
     });
 });

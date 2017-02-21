@@ -69,4 +69,37 @@ class AdminController extends OurBlog_Controller_Action_PostLogin
             die('Server Error');
         }
     }
+
+    public function uploadAction()
+    {
+        $this->disableLayoutAndView();
+
+        try {
+            OurBlog_Util::killCSRF();
+            $upload = new OurBlog_Upload(
+                $this->uid,
+                APPLICATION_PATH . '/../public/uploads',
+                APPLICATION_PATH . '/../data/uploads'
+            );
+            $result = $upload->upload();
+            if ($result['access'] == 'direct') {
+                $url = '/uploads/' . $this->uid . '/' . urlencode($result['filename']);
+            } else {
+                $url = '/file/?uid=' . $this->uid . '&filename=' . urlencode($result['filename']);
+            }
+            $return = array(
+                'success' => 1,
+                'message' => '上传成功',
+                'url'     => $url
+            );
+        } catch (Exception $e) {
+            $return = array(
+                'success' => 0,
+                'message' => $e->getMessage()
+            );
+        }
+
+        header('Content-Type:application/json;charset=UTF-8');
+        echo json_encode($return);
+    }
 }

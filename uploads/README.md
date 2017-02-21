@@ -1,1 +1,0 @@
-admin/upload.php会为每个用户单独创建一个目录
