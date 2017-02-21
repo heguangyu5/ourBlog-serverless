@@ -1,0 +1,23 @@
+<?php
+    $this->headTitle($this->post->title);
+
+    $this->headLink()->appendStylesheet('/editormd/editormd.min.css')
+                     ->appendStylesheet('/editormd/editormd.preview.overwrite.css');
+?>
+
+<div class="text-lft">
+    <div id="editormd">
+        <textarea class="hide"><?php
+            echo '# ', htmlspecialchars($this->post->title), "\n";
+            echo "\n[TOC]\n\n";
+            echo htmlspecialchars($this->post->content);
+        ?></textarea>
+    </div>
+</div>
+
+<?php
+    $this->headScript()->appendFile('/editormd/lib/marked.min.js')
+                       ->appendFile('/editormd/lib/prettify.min.js')
+                       ->appendFile('/editormd/editormd.min.js')
+                       ->appendFile('/js/index/post.js');
+?>

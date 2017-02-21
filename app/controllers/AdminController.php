@@ -37,12 +37,7 @@ class AdminController extends OurBlog_Controller_Action_PostLogin
         }
 
         try {
-            if (!isset($_GET['id'])) {
-                throw new InvalidArgumentException('missing required key id');
-            }
-            $id = filter_var($_GET['id'], FILTER_VALIDATE_INT, array(
-                'options' => array('min_range' => 1)
-            ));
+            $id = OurBlog_Util::DBAIPK($this->getQuery('id'));
             if (!$id) {
                 throw new InvalidArgumentException('invalid id');
             }

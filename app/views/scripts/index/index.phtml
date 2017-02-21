@@ -1,1 +1,11 @@
-index
+<?php
+    echo $this->headTitle('首页');
+?>
+
+<div class="text-lft">
+<?php foreach ($this->posts as $post): ?>
+    <a href="/index/post/?id=<?php echo $post->id; ?>" target="_blank" class="block mar-btm">
+        <?php echo htmlspecialchars($post->title); ?>
+    </a>
+    <?php endforeach; ?>
+</div>
