@@ -1,0 +1,36 @@
+<?php
+    $this->headTitle('写博文');
+
+    if ($this->error) {
+        echo '<p class="text-red">', $this->error, '</p>';
+    }
+
+    $this->headLink()->appendStylesheet('/editormd/editormd.min.css')
+                     ->appendStylesheet('/editormd/editormd.preview.overwrite.css');
+?>
+
+<form method="POST" class="text-lft">
+    <select name="category" class="block mar-btm">
+        <option value="">所属栏目</option>
+        <?php
+            $rows = Zend_Db_Table_Abstract::getDefaultAdapter()->fetchAll('SELECT id, name FROM category', array(), Zend_Db::FETCH_OBJ);
+            foreach ($rows as $row) {
+                echo '<option value="', $row->id, '">', htmlspecialchars($row->name), '</option>';
+            }
+        ?>
+    </select>
+    <input type="text" name="title" placeholder="标题" class="block mar-btm">
+    <label class="block mar-btm"><input type="checkbox" name="externalPost" id="externalPost" style="width:auto" value="1"> 外部文章</label>
+    <input type="hidden" id="externalPostUrl" placeholder="http(s)://" value="http://">
+    <div id="editormd">
+        <textarea name="content" class="hide"></textarea>
+    </div>
+    <p>多个标签使用,号分隔,最多可打10个标签</p>
+    <input type="text" name="tags" placeholder="标签" class="block mar-btm">
+    <button type="submit">提交</button>
+</form>
+
+<?php
+    $this->headScript()->appendFile('/editormd/editormd.min.js')
+                       ->appendFile('/js/admin/add.js');
+?>

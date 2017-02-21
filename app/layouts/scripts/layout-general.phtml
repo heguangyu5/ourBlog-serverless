@@ -7,13 +7,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <?php echo $this->headTitle('OurBlog')->setSeparator(' - '); ?>
     <?php echo $this->headLink(); ?>
-    <link href="/style.css" rel="stylesheet">
+    <link href="/css/style.css" rel="stylesheet">
 </head>
 <body>
     <div class="margin-center max-width-1200">
         <h1 class="border-btm text-lft">OurBlog</h1>
         <?php echo $this->layout()->content; ?>
     </div>
+
+    <script src="/js/jquery-3.0.0.min.js"></script>
     <?php echo $this->headScript(); ?>
 </body>
 </html>

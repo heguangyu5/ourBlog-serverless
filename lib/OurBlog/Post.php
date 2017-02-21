@@ -2,12 +2,10 @@
 
 class OurBlog_Post
 {
-    protected $db;
     protected $uid;
 
-    public function __construct(PDO $db, $uid)
+    public function __construct($uid)
     {
-        $this->db  = $db;
         $this->uid = $uid;
     }
 
@@ -79,9 +77,11 @@ class OurBlog_Post
             unset($data['tags']);
             if ($tagIdMap) {
                 // filter out exist tags
-                $stmt = $this->db->prepare('SELECT id, name FROM tag WHERE name IN (?' . str_repeat(', ?', count($tagIdMap) - 1) . ')');
-                $stmt->execute(array_keys($tagIdMap));
-                $tagRows = $stmt->fetchAll(PDO::FETCH_OBJ);
+                $tagRows = Zend_Db_Table_Abstract::getDefaultAdapter()->fetchAll(
+                    'SELECT id, name FROM tag WHERE name IN (?' . str_repeat(', ?', count($tagIdMap) - 1) . ')',
+                    array_keys($tagIdMap),
+                    Zend_Db::FETCH_OBJ
+                );
                 foreach ($tagRows as $row) {
                     $tagIdMap[$row->name] = $row->id;
                 }
@@ -106,39 +106,39 @@ class OurBlog_Post
 
         $createDate = date('Y-m-d H:i:s');
 
-        $this->db->beginTransaction();
+        $db = Zend_Db_Table_Abstract::getDefaultAdapter();
+        $db->beginTransaction();
         try {
             // post
-            $stmt = $this->db->prepare('INSERT INTO posts(uid, category, title, content, external_post, create_date, update_date) VALUES (?, ?, ?, ?, ?, ?, ?)');
-            $stmt->execute(array(
-                $this->uid,
-                $data['category'],
-                $data['title'],
-                $data['content'],
-                $data['externalPost'],
-                $createDate,
-                $createDate
+            $db->insert('posts', array(
+                'uid'           => $this->uid,
+                'category'      => $data['category'],
+                'title'         => $data['title'],
+                'content'       => $data['content'],
+                'external_post' => $data['externalPost'],
+                'create_date'   => $createDate,
+                'update_date'   => $createDate
             ));
             // tags
             if (isset($data['tagIdMap'])) {
-                $postId = $this->db->lastInsertId();
+                $postId = $db->lastInsertId();
                 // tag
                 if ($data['newTags']) {
-                    $stmt = $this->db->prepare('INSERT INTO tag(name) VALUES (?)');
+                    $stmt = $db->prepare('INSERT INTO tag(name) VALUES (?)');
                     foreach ($data['newTags'] as $tag) {
                         $stmt->execute(array($tag));
-                        $data['tagIdMap'][$tag] = $this->db->lastInsertId();
+                        $data['tagIdMap'][$tag] = $db->lastInsertId();
                     }
                 }
                 // post_tag
-                $stmt = $this->db->prepare('INSERT INTO post_tag(post_id, tag_id) VALUES (?, ?)');
+                $stmt = $db->prepare('INSERT INTO post_tag(post_id, tag_id) VALUES (?, ?)');
                 foreach ($data['tagIdMap'] as $tagId) {
                     $stmt->execute(array($postId, $tagId));
                 }
             }
-            $this->db->commit();
+            $db->commit();
         } catch (Exception $e) {
-            $this->db->rollBack();
+            $db->rollBack();
             throw $e;
         }
     }

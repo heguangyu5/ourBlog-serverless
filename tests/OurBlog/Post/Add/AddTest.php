@@ -11,7 +11,7 @@ class OurBlog_Post_AddTest extends OurBlog_DatabaseTestCase
     {
         $this->data = include __DIR__ . '/data.php';
         if (!self::$post) {
-            self::$post = new OurBlog_Post(OurBlog_DatabaseTestCase::getDb(), 1);
+            self::$post = new OurBlog_Post(1);
         }
 
         return $this->createArrayDataSet(array(
