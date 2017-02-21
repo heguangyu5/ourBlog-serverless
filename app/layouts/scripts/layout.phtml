@@ -12,12 +12,12 @@
 <body>
     <div class="margin-center max-width-1200">
         <h1 class="border-btm text-lft">
-            <a href="index.php" class="no-underline mar-rgt-lg">OurBlog</a>
-            <a href="index.php" class="text-sm mar-rgt">首页</a>
+            <a href="/" class="no-underline mar-rgt-lg">OurBlog</a>
+            <a href="/" class="text-sm mar-rgt">首页</a>
             <?php
                 $rows = Zend_Db_Table_Abstract::getDefaultAdapter()->fetchAll('SELECT id, name FROM category', array(), Zend_Db::FETCH_OBJ);
                 foreach ($rows as $row) {
-                    echo '<a href="index.php?category=', $row->id, '" class="text-sm mar-rgt">', htmlspecialchars($row->name), '</a>';
+                    echo '<a href="/?category=', $row->id, '" class="text-sm mar-rgt">', htmlspecialchars($row->name), '</a>';
                 }
             ?>
         </h1>
