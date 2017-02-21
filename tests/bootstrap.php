@@ -1,8 +1,14 @@
 <?php
 
-include __DIR__ . '/../lib/OurBlog/Util.php';
-include __DIR__ . '/../lib/OurBlog/Auth.php';
-include __DIR__ . '/../lib/OurBlog/Post.php';
+define('APPLICATION_PATH', realpath(__DIR__ . '/../app'));
+define('APPLICATION_ENV', 'testing');
+
+require_once 'Zend/Application.php';
+$app = new Zend_Application(
+    APPLICATION_ENV,
+    APPLICATION_PATH . '/configs/app.ini'
+);
+$app->bootstrap();
 
 class OurBlog_DbUnit_ArrayDataSet extends PHPUnit_Extensions_Database_DataSet_AbstractDataSet
 {
@@ -43,27 +49,14 @@ class OurBlog_DbUnit_ArrayDataSet extends PHPUnit_Extensions_Database_DataSet_Ab
 
 abstract class OurBlog_DatabaseTestCase extends PHPUnit_Extensions_Database_TestCase
 {
-    protected static $pdo;
     protected static $connection;
-
-    public static function getDb()
-    {
-        if (!self::$pdo) {
-            self::$pdo = new PDO(
-                'mysql:host=localhost;port=3306;dbname=ourblog_test;charset=utf8',
-                'root',
-                '123456'
-            );
-            self::$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        }
-
-        return self::$pdo;
-    }
 
     public function getConnection()
     {
         if (!self::$connection) {
-            self::$connection = $this->createDefaultDBConnection(self::getDb(), 'ourblog_test');
+            $db       = Zend_Db_Table_Abstract::getDefaultAdapter();
+            $dbConfig = $db->getConfig();
+            self::$connection = $this->createDefaultDBConnection($db->getConnection(), $dbConfig['dbname']);
         }
         return self::$connection;
     }

@@ -1,17 +1,13 @@
 <?php
 
-class OurBlog_Auth
+class OurBlog_Auth implements Zend_Auth_Adapter_Interface
 {
     const SALT = 'EYFXOEII/T3Y/75D0pUXbz5bqxVIpo7qMipQ7MtnPaUHIvX1nDKgU6KfLf9JpYAvjO7dacpgt8C/';
 
-    protected $db;
+    protected $email;
+    protected $password;
 
-    public function __construct(PDO $db)
-    {
-        $this->db = $db;
-    }
-
-    public function authenticate($email, $password)
+    public function __construct($email, $password)
     {
         // email
         $len = strlen($email);
@@ -28,10 +24,21 @@ class OurBlog_Auth
             throw new InvalidArgumentException('invalid password, length limit 6~50');
         }
 
-        $password = md5(self::SALT . '-' . $password);
+        $this->email    = $email;
+        $this->password = $password;
+    }
 
-        $stmt = $this->db->prepare('SELECT uid FROM user WHERE email = ? AND password = ?');
-        $stmt->execute(array($email, $password));
-        return $stmt->fetchColumn();
+    public function authenticate()
+    {
+        $uid = Zend_Db_Table_Abstract::getDefaultAdapter()->fetchOne(
+            'SELECT uid FROM user WHERE email = ? AND password = ?',
+            array($this->email, md5(self::SALT . '-' . $this->password))
+        );
+
+        if ($uid) {
+            return new Zend_Auth_Result(Zend_Auth_Result::SUCCESS, $uid);
+        }
+
+        return new Zend_Auth_Result(Zend_Auth_Result::FAILURE, 0);
     }
 }

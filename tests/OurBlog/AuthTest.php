@@ -4,22 +4,13 @@
  */
 class OurBlog_AuthTest extends PHPUnit_Framework_TestCase
 {
-    protected static $auth;
-
-    public function setUp()
-    {
-        if (!self::$auth) {
-            self::$auth = new OurBlog_Auth(OurBlog_DatabaseTestCase::getDb());
-        }
-    }
-
     /**
      * @expectedException InvalidArgumentException
      * @expectedExceptionMessage invalid email, length limit 5~200
      */
     public function testEmailMinLenthIs5()
     {
-        self::$auth->authenticate('a@bb', '');
+        new OurBlog_Auth('a@bb', '');
     }
 
     /**
@@ -28,7 +19,7 @@ class OurBlog_AuthTest extends PHPUnit_Framework_TestCase
      */
     public function testEmailMaxLenthIs200()
     {
-        self::$auth->authenticate(
+        new OurBlog_Auth(
             str_pad('a@b.com', 201, 'a', STR_PAD_LEFT),
             ''
         );
@@ -51,7 +42,7 @@ class OurBlog_AuthTest extends PHPUnit_Framework_TestCase
      */
     public function testEmailFormat($email)
     {
-        self::$auth->authenticate($email, '');
+        new OurBlog_Auth($email, '');
     }
 
     /**
@@ -60,7 +51,7 @@ class OurBlog_AuthTest extends PHPUnit_Framework_TestCase
      */
     public function testPasswordMinLenthIs6()
     {
-        self::$auth->authenticate('heguangyu5@qq.com', '12345');
+        new OurBlog_Auth('heguangyu5@qq.com', '12345');
     }
 
     /**
@@ -69,12 +60,18 @@ class OurBlog_AuthTest extends PHPUnit_Framework_TestCase
      */
     public function testPasswordMaxLenthIs50()
     {
-        self::$auth->authenticate('heguangyu5@qq.com', str_pad('12345', 51, '6'));
+        new OurBlog_Auth('heguangyu5@qq.com', str_pad('12345', 51, '6'));
     }
 
     public function testAuthenticateWillReturnUIDIfEmailPasswordOK()
     {
-        $this->assertEquals(1, self::$auth->authenticate('heguangyu5@qq.com', '123456'));
+        $auth   = new OurBlog_Auth('heguangyu5@qq.com', '123456');
+        $result = $auth->authenticate();
+
+        $this->assertInstanceOf('Zend_Auth_Result', $result);
+        $this->assertEquals(Zend_Auth_Result::SUCCESS, $result->getCode());
+        $this->assertEquals(1, $result->getIdentity());
+        $this->assertTrue($result->isValid());
     }
 
     public function wrongEmailPasswords()
@@ -91,6 +88,12 @@ class OurBlog_AuthTest extends PHPUnit_Framework_TestCase
      */
     public function testAuthenticateWillReturnFalseIfEmailPasswordNotMatch($email, $password)
     {
-        $this->assertEquals(false, self::$auth->authenticate($email, $password));
+        $auth   = new OurBlog_Auth($email, $password);
+        $result = $auth->authenticate();
+
+        $this->assertInstanceOf('Zend_Auth_Result', $result);
+        $this->assertEquals(Zend_Auth_Result::FAILURE, $result->getCode());
+        $this->assertEquals(0, $result->getIdentity());
+        $this->assertFalse($result->isValid());
     }
 }

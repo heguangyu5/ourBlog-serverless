@@ -1,6 +1,6 @@
 <?php
 
-class ErrorController extends Zend_Controller_Action
+class ErrorController extends OurBlog_Controller_Action
 {
     public function indexAction()
     {
@@ -9,6 +9,8 @@ class ErrorController extends Zend_Controller_Action
 
     public function errorAction()
     {
+        $this->setLayout('layout-general');
+
         // @see Zend_Controller_Plugin_ErrorHandler::_handleError()
         $error = $this->getParam('error_handler');
         if (!$error || !$error instanceof ArrayObject) {

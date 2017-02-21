@@ -1,0 +1,30 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <?php echo $this->headTitle('OurBlog')->setSeparator(' - '); ?>
+    <?php echo $this->headLink(); ?>
+    <link href="/style.css" rel="stylesheet">
+</head>
+<body>
+    <div class="margin-center max-width-1200">
+        <h1 class="border-btm text-lft">
+            <div class="pull-right text-sm" style="padding-top:18px">
+                <a href="javascript:void(0);"><?php echo htmlspecialchars($_SESSION['email']); ?></a>
+                <a href="/logout/">退出</a>
+            </div>
+            <a href="/admin/" class="no-underline mar-rgt-lg">OurBlog</a>
+            <a href="/admin/" class="text-sm">博文管理</a>
+            <a href="/admin/add/" class="text-sm">写博文</a>
+            <a href="/" class="text-sm" target="_blank">前台首页</a>
+        </h1>
+
+        <?php echo $this->layout()->content; ?>
+
+    </div>
+    <?php echo $this->headScript(); ?>
+</body>
+</html>
