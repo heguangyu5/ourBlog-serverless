@@ -153,8 +153,11 @@ class OurBlog_Post
             throw new InvalidArgumentException('invalid id');
         }
 
-        $stmt = $this->db->query('SELECT id, external_post FROM posts WHERE id = ' . $data['id'] . ' AND uid = ' . $this->uid);
-        $post = $stmt->fetch(PDO::FETCH_OBJ);
+        $post = Zend_Db_Table_Abstract::getDefaultAdapter()->fetchRow(
+            'SELECT id, external_post FROM posts WHERE id = ' . $data['id'] . ' AND uid = ' . $this->uid,
+            array(),
+            Zend_Db::FETCH_OBJ
+        );
         if (!$post) {
             throw new InvalidArgumentException('you can only edit your own post');
         }
@@ -168,11 +171,15 @@ class OurBlog_Post
     public function edit(array $data)
     {
         $data = $this->prepareEditPostData($data);
+        $db   = Zend_Db_Table_Abstract::getDefaultAdapter();
 
         if (isset($data['tagIdMap'])) {
             // 取得post原有的tag
-            $stmt = $this->db->query('SELECT tag_id FROM post_tag WHERE post_id = ' . $data['id']);
-            $postTagIds = $stmt->fetchAll(PDO::FETCH_COLUMN);
+            $postTagIds = $db->fetchAll(
+                'SELECT tag_id FROM post_tag WHERE post_id = ' . $data['id'],
+                array(),
+                Zend_Db::FETCH_COLUMN
+            );
             // diff
             $tagIds = array();
             foreach ($data['tagIdMap'] as $tagId) {
@@ -186,32 +193,30 @@ class OurBlog_Post
 
         $updateDate = date('Y-m-d H:i:s');
 
-        $this->db->beginTransaction();
+        $db->beginTransaction();
         try {
             // post
-            $stmt = $this->db->prepare("UPDATE posts SET category = ?, title = ?, content = ?, update_date = ? WHERE id = ?");
-            $stmt->execute(array(
-                $data['category'],
-                $data['title'],
-                $data['content'],
-                $updateDate,
-                $data['id']
-            ));
+            $db->update('posts', array(
+                'category'    => $data['category'],
+                'title'       => $data['title'],
+                'content'     => $data['content'],
+                'update_date' => $updateDate
+            ), 'id = ' . $data['id']);
             // tags
             if (isset($data['tagIdMap'])) {
                 // newTags
                 if ($data['newTags']) {
-                    $stmtTag     = $this->db->prepare('INSERT INTO tag(name) VALUES (?)');
-                    $stmtPostTag = $this->db->prepare('INSERT INTO post_tag(post_id, tag_id) VALUES (?, ?)');
+                    $stmtTag     = $db->prepare('INSERT INTO tag(name) VALUES (?)');
+                    $stmtPostTag = $db->prepare('INSERT INTO post_tag(post_id, tag_id) VALUES (?, ?)');
                     foreach ($data['newTags'] as $tag) {
                         $stmtTag->execute(array($tag));
-                        $stmtPostTag->execute(array($data['id'], $this->db->lastInsertId()));
+                        $stmtPostTag->execute(array($data['id'], $db->lastInsertId()));
                     }
                 }
                 // toBeAdded
                 if ($tagIdsToBeAdded) {
                     if (!$data['newTags']) {
-                        $stmtPostTag = $this->db->prepare('INSERT INTO post_tag(post_id, tag_id) VALUES (?, ?)');
+                        $stmtPostTag = $db->prepare('INSERT INTO post_tag(post_id, tag_id) VALUES (?, ?)');
                     }
                     foreach ($tagIdsToBeAdded as $tagId) {
                         $stmtPostTag->execute(array($data['id'], $tagId));
@@ -219,14 +224,14 @@ class OurBlog_Post
                 }
                 // toBeDeleted
                 if ($tagIdsToBeDeleted) {
-                    $this->db->exec('DELETE FROM post_tag WHERE post_id = ' . $data['id'] . ' AND tag_id IN (' . implode(',', $tagIdsToBeDeleted) . ')');
+                    $db->exec('DELETE FROM post_tag WHERE post_id = ' . $data['id'] . ' AND tag_id IN (' . implode(',', $tagIdsToBeDeleted) . ')');
                 }
             } else {
-                $this->db->exec('DELETE FROM post_tag WHERE post_id = ' . $data['id']);
+                $db->exec('DELETE FROM post_tag WHERE post_id = ' . $data['id']);
             }
-            $this->db->commit();
+            $db->commit();
         } catch (Exception $e) {
-            $this->db->rollBack();
+            $db->rollBack();
             throw $e;
         }
     }

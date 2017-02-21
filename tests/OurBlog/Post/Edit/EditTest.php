@@ -21,7 +21,7 @@ class OurBlog_Post_EditTest extends OurBlog_DatabaseTestCase
     {
         unset($this->data['id']);
 
-        $post = new OurBlog_Post(OurBlog_DatabaseTestCase::getDb(), 1);
+        $post = new OurBlog_Post(1);
         $post->edit($this->data);
     }
 
@@ -45,13 +45,13 @@ class OurBlog_Post_EditTest extends OurBlog_DatabaseTestCase
     {
         $this->data['id'] = $id;
 
-        $post = new OurBlog_Post(OurBlog_DatabaseTestCase::getDb(), 1);
+        $post = new OurBlog_Post(1);
         $post->edit($this->data);
     }
 
     public function testEditPost()
     {
-        $post = new OurBlog_Post(OurBlog_DatabaseTestCase::getDb(), 1);
+        $post = new OurBlog_Post(1);
         $post->edit($this->data);
 
         $expectedDataSet = $this->createArrayDataSet(include __DIR__ . '/expects.php');
@@ -69,7 +69,7 @@ class OurBlog_Post_EditTest extends OurBlog_DatabaseTestCase
      */
     public function testUserCannotEditOthersPost()
     {
-        $post = new OurBlog_Post(OurBlog_DatabaseTestCase::getDb(), 2);
+        $post = new OurBlog_Post(2);
         $post->edit($this->data);
     }
 
@@ -77,7 +77,7 @@ class OurBlog_Post_EditTest extends OurBlog_DatabaseTestCase
     {
         $this->data['tags'] = '';
 
-        $post = new OurBlog_Post(OurBlog_DatabaseTestCase::getDb(), 1);
+        $post = new OurBlog_Post(1);
         $post->edit($this->data);
 
         $expectedDataSet = $this->createArrayDataSet(include __DIR__ . '/expects-delete-all-tags.php');
@@ -93,7 +93,7 @@ class OurBlog_Post_EditTest extends OurBlog_DatabaseTestCase
     {
         $this->data['tags'] = 'PHP,MySQL,Linux';
 
-        $post = new OurBlog_Post(OurBlog_DatabaseTestCase::getDb(), 1);
+        $post = new OurBlog_Post(1);
         $post->edit($this->data);
 
         $expectedDataSet = $this->createArrayDataSet(include __DIR__ . '/expects-add-exist-tags.php');

@@ -19,7 +19,7 @@ class OurBlog_Post_EditExternalPostTest extends OurBlog_DatabaseTestCase
             'tags'     => 'MySQL,死锁'
         );
 
-        $post = new OurBlog_Post(OurBlog_DatabaseTestCase::getDb(), 1);
+        $post = new OurBlog_Post(1);
         $post->edit($data);
 
         $expectedDataSet = $this->createArrayDataSet(include __DIR__ . '/expects.php');

@@ -20,4 +20,44 @@ class AdminController extends OurBlog_Controller_Action_PostLogin
             }
         }
     }
+
+    public function editAction()
+    {
+        if ($_POST) {
+            try {
+                OurBlog_Util::killCSRF();
+                $post = new OurBlog_Post($this->uid);
+                $post->edit($_POST);
+                $this->redirect('/admin/');
+            } catch (InvalidArgumentException $e) {
+                $this->error = '参数不对';
+            } catch (Exception $e) {
+                $this->error = 'Server Error';
+            }
+        }
+
+        try {
+            if (!isset($_GET['id'])) {
+                throw new InvalidArgumentException('missing required key id');
+            }
+            $id = filter_var($_GET['id'], FILTER_VALIDATE_INT, array(
+                'options' => array('min_range' => 1)
+            ));
+            if (!$id) {
+                throw new InvalidArgumentException('invalid id');
+            }
+            $post = Zend_Db_Table_Abstract::getDefaultAdapter()->fetchRow(
+                "SELECT id, category, title, content, external_post FROM posts WHERE id = $id AND uid = " . $this->uid,
+                array(),
+                Zend_Db::FETCH_OBJ
+            );
+            if (!$post) {
+                throw new InvalidArgumentException('post not exist');
+            }
+        } catch (InvalidArgumentException $e) {
+            $this->redirect('/admin/');
+        }
+
+        $this->view->post = $post;
+    }
 }
