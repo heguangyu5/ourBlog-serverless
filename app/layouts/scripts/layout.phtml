@@ -6,27 +6,37 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <?php echo $this->headTitle('OurBlog')->setSeparator(' - '); ?>
-    <?php echo $this->headLink(); ?>
+    <link rel="stylesheet" href="/bootstrap/3.3.5/css/bootstrap.min.css">
     <link href="/css/style.css" rel="stylesheet">
+    <?php echo $this->headLink(); ?>
 </head>
 <body>
-    <div class="margin-center max-width-1200">
-        <h1 class="border-btm text-lft">
-            <a href="/" class="no-underline mar-rgt-lg">OurBlog</a>
-            <a href="/" class="text-sm mar-rgt">首页</a>
-            <?php
-                $rows = Zend_Db_Table_Abstract::getDefaultAdapter()->fetchAll('SELECT id, name FROM category', array(), Zend_Db::FETCH_OBJ);
-                foreach ($rows as $row) {
-                    echo '<a href="/?category=', $row->id, '" class="text-sm mar-rgt">', htmlspecialchars($row->name), '</a>';
-                }
-            ?>
-        </h1>
+    <nav class="navbar navbar-inverse">
+        <div class="container">
+            <ul class="nav navbar-nav">
+                <li<?php echo $this->category ? '' : ' class="active"'; ?>>
+                    <a class="navbar-brand" href="/">Home</a>
+                </li>
+                <?php
+                    $rows = Zend_Db_Table_Abstract::getDefaultAdapter()->fetchAll('SELECT id, name FROM category', array(), Zend_Db::FETCH_OBJ);
+                    foreach ($rows as $row) {
+                        echo '<li', ($this->category == $row->id ? ' class="active"' : ''), '>',
+                                '<a href="/?category=', $row->id, '">',
+                                    $this->escape($row->name),
+                                '</a>',
+                             '</li>';
+                    }
+                ?>
+            </ul>
+        </div>
+    </nav>
 
+    <div class="container">
         <?php echo $this->layout()->content; ?>
-
     </div>
 
     <script src="/js/jquery-3.0.0.min.js"></script>
+    <script src="/bootstrap/3.3.5/js/bootstrap.min.js"></script>
     <?php echo $this->headScript(); ?>
 </body>
 </html>

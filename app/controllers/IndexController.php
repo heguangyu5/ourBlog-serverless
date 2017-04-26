@@ -12,6 +12,7 @@ class IndexController extends OurBlog_Controller_Action
         $category = OurBlog_Util::DBAIPK($this->getQuery('category'));
         if ($category) {
             $select->where('category = ' . $category);
+            $this->view->category = $category;
         }
 
         $this->view->posts = $db->fetchAll($select, array(), Zend_Db::FETCH_OBJ);
@@ -25,7 +26,7 @@ class IndexController extends OurBlog_Controller_Action
                 throw new InvalidArgumentException('invalid id');
             }
             $post = Zend_Db_Table_Abstract::getDefaultAdapter()->fetchRow(
-                "SELECT title, content, external_post FROM posts WHERE id = $id",
+                "SELECT title, content, external_post, category FROM posts WHERE id = $id",
                 array(),
                 Zend_Db::FETCH_OBJ
             );
@@ -42,5 +43,6 @@ class IndexController extends OurBlog_Controller_Action
         }
 
         $this->view->post = $post;
+        $this->view->category = $post->category;
     }
 }

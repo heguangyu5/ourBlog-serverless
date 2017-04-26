@@ -1,4 +1,4 @@
-body {
+/*body {
     font-size: 16px;
 }
 h1 {
@@ -25,16 +25,10 @@ textarea {
 .block {
     display: block;
 }
-
-.pull-right {
-    float: right;
-}
-.hide {
-    display: none;
-}
+*/
 
 /* width */
-.max-width-1200 {
+/*.max-width-1200 {
     max-width: 1200px;
 }
 .w100 {
@@ -42,30 +36,30 @@ textarea {
 }
 .w200 {
     width: 200px;
-}
+}*/
 
 /* border */
-.border-btm {
+/*.border-btm {
     border-bottom: 1px solid;
-}
+}*/
 
 /* text align */
-.text-lft {
+/*.text-lft {
     text-align: left;
 }
 .text-rgt {
     text-align: right;
-}
+}*/
 /* text color */
-.text-red {
+/*.text-red {
     color: red;
-}
+}*/
 /* text size */
-.text-sm {
+/*.text-sm {
     font-size: 14px;
-}
+}*/
 /* margin */
-.mar-btm {
+/*.mar-btm {
     margin-bottom: 15px;
 }
 .mar-rgt {
@@ -73,13 +67,13 @@ textarea {
 }
 .mar-rgt-lg {
     margin-right: 30px;
-}
+}*/
 /* padding */
 
 /* link */
-a {
+/*a {
     text-decoration: none;
 }
 a:not(.no-underline):hover {
     text-decoration: underline;
-}
+}*/
