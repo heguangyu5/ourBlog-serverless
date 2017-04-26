@@ -1,71 +1,72 @@
 <?php
     $this->headTitle('写博文');
 
-    if ($this->error) {
-        echo '<p class="text-red">', $this->error, '</p>';
-    }
-
     $this->headLink()->appendStylesheet('/editormd/editormd.min.css')
                      ->appendStylesheet('/editormd/editormd.preview.overwrite.css');
 ?>
 
 <div class="margin-center mw1500">
     <form method="POST" class="mar-hor-lg">
-            <div class="form-group mw400">
-                <?php
-                    $rows = Zend_Db_Table_Abstract::getDefaultAdapter()->fetchAll('SELECT id, name FROM category');
-                    $categoryList = array();
-                    foreach ($rows as $row) {
-                        $categoryList[$row['id']] = $row['name'];
-                    }
-                    echo $this->ourFormSelect(
-                        'category',
-                        '0',
-                        array('class' => 'form-control'),
-                        $categoryList,
-                        true,
-                        '<option value="0">-所属栏目-</option>'
-                    );
-                ?>
+    <?php
+        if ($this->error) {
+            echo '<div class="form-group text-danger">', $this->error, '</div>';
+        }
+    ?>
+        <div class="form-group mw400">
+            <?php
+                $rows = Zend_Db_Table_Abstract::getDefaultAdapter()->fetchAll('SELECT id, name FROM category');
+                $categoryList = array();
+                foreach ($rows as $row) {
+                    $categoryList[$row['id']] = $row['name'];
+                }
+                echo $this->ourFormSelect(
+                    'category',
+                    '0',
+                    array('class' => 'form-control'),
+                    $categoryList,
+                    true,
+                    '<option value="0">-所属栏目-</option>'
+                );
+            ?>
+        </div>
+        <div class="form-group">
+            <?php
+                echo $this->formText('title', '', array(
+                    'class'       => 'form-control',
+                    'placeholder' => '文章标题'
+                ));
+            ?>
+        </div>
+        <div class="form-group">
+            <div class="checkbox">
+                <label>
+                    <input type="checkbox" name="externalPost" id="externalPost" value="1"> 外部文章
+                </label>
             </div>
-            <div class="form-group">
-                <?php
-                    echo $this->formText('title', '', array(
-                        'class'       => 'form-control',
-                        'placeholder' => '文章标题'
-                    ));
-                ?>
-            </div>
-            <div class="form-group">
-                <div class="checkbox">
-                    <label>
-                        <input type="checkbox" name="externalPost" id="externalPost" value="1"> 外部文章
-                    </label>
-                </div>
-            </div>
-            <div class="form-group hide">
-                <?php
-                    echo $this->formText('externalPostUrl', 'http://', array(
-                        'class'       => 'form-control',
-                        'placeholder' => '外部文章链接'
-                    ));
-                ?>
-            </div>
+        </div>
+        <div class="form-group hide">
+            <?php
+                echo $this->formText('externalPostUrl', 'http://', array(
+                    'class'       => 'form-control',
+                    'placeholder' => '外部文章链接'
+                ));
+            ?>
+        </div>
         <div id="editormd">
             <textarea name="content" class="hide"></textarea>
         </div>
-            <div class="form-group">
-                <?php
-                    echo $this->formText('tags', '', array(
-                        'class'       => 'form-control',
-                        'placeholder' => '标签'
-                    ));
-                ?>
-                <p class="help-block">多个标签使用,号分隔,最多可打10个标签</p>
-            </div>
-            <div class="form-group">
-                <button type="submit" class="btn btn-primary w100">提交</button>
-            </div>
+        <div class="form-group">
+            <?php
+                echo $this->formText('tags', '', array(
+                    'class'       => 'form-control',
+                    'placeholder' => '标签'
+                ));
+            ?>
+            <p class="help-block">多个标签使用,号分隔,最多可打10个标签</p>
+        </div>
+        <div class="form-group">
+            <button type="submit" class="btn btn-primary w100">提交</button>
+        </div>
     </form>
 </div>
 
