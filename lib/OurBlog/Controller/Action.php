@@ -53,7 +53,7 @@ class OurBlog_Controller_Action extends Zend_Controller_Action
         );
 
         return Zend_Paginator::factory($select)
-                               ->setItemCountPerPage(30)
+                               ->setItemCountPerPage(24)
                                ->setPageRange(7)
                                ->setCurrentPageNumber($this->getQuery('page'));
     }
