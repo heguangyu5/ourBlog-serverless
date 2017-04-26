@@ -2,21 +2,25 @@
     $this->headTitle('后台首页');
 ?>
 
-<div class="text-lft">
-<?php
-    $rows = Zend_Db_Table_Abstract::getDefaultAdapter()->fetchAll(
-        "SELECT id, title FROM posts WHERE uid = ? ORDER BY id DESC",
-        $this->uid,
-        Zend_Db::FETCH_OBJ
-    );
-    foreach ($rows as $row):
-?>
-    <div class="mar-btm">
-        <?php echo htmlspecialchars($row->title); ?>
-        <div class="pull-right">
-            <a href="/admin/edit/?id=<?php echo $row->id; ?>">编辑</a>
-            <a href="/admin/delete/?id=<?php echo $row->id; ?>">删除</a>
-        </div>
-    </div>
-<?php endforeach; ?>
+<div class="container">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <td>Total: <?php echo $this->paginator->getTotalItemCount(); ?></td>
+                <td width="100"></td>
+            </tr>
+        </thead>
+        <tbody>
+            <?php foreach ($this->paginator as $item): ?>
+            <tr>
+                <th><?php echo $this->escape($item['title']); ?></th>
+                <td>
+                    <a href="/admin/edit/?id=<?php echo $item['id']; ?>">编辑</a>
+                    <a href="/admin/delete/?id=<?php echo $item['id']; ?>">删除</a>
+                </td>
+            </tr>
+            <?php endforeach; ?>
+        </tbody>
+    </table>
+    <?php echo $this->paginator; ?>
 </div>

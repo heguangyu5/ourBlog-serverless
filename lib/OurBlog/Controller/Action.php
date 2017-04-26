@@ -44,4 +44,17 @@ class OurBlog_Controller_Action extends Zend_Controller_Action
 
         readfile($path);
     }
+
+    public function initPaginator($select)
+    {
+        Zend_Paginator::setDefaultScrollingStyle('Sliding');
+        Zend_View_Helper_PaginationControl::setDefaultViewPartial(
+            'pagination-control-default.phtml'
+        );
+
+        return Zend_Paginator::factory($select)
+                               ->setItemCountPerPage(30)
+                               ->setPageRange(7)
+                               ->setCurrentPageNumber($this->getQuery('page'));
+    }
 }

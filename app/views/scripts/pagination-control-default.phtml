@@ -1,0 +1,15 @@
+<ul class="pagination">
+<?php
+    if ($this->pageCount > 1) {
+        $baseUrl = $this->paginatorBaseUrl();
+        // pages
+        foreach ($this->pagesInRange as $page) {
+            if ($page != $this->current) {
+                echo '<li><a href="', $baseUrl, $page, '">', $page, '</a></li>';
+            } else {
+                echo '<li class="active"><a href="javascript:void(0);">', $page, '</a></li>';
+            }
+        }
+    }
+?>
+</ul>
