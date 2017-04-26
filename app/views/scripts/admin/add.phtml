@@ -7,11 +7,11 @@
 
 <div class="margin-center mw1500">
     <form method="POST" class="mar-hor-lg">
-    <?php
-        if ($this->error) {
-            echo '<div class="form-group text-danger">', $this->error, '</div>';
-        }
-    ?>
+        <?php
+            if ($this->error) {
+                echo '<div class="form-group text-danger">', $this->error, '</div>';
+            }
+        ?>
         <div class="form-group mw400">
             <?php
                 $rows = Zend_Db_Table_Abstract::getDefaultAdapter()->fetchAll('SELECT id, name FROM category');
