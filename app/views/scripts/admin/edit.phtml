@@ -1,44 +1,63 @@
 <?php
     $this->headTitle('编辑');
-
-    if ($this->error) {
-        echo '<p class="text-red">', $this->error, '</p>';
-    }
 ?>
 
-<form method="POST" class="text-lft">
-    <input type="hidden" name="id" value="<?php echo $this->post->id; ?>">
-    <select name="category" class="block mar-btm">
-        <option value="">所属栏目</option>
+<div class="margin-center mw1500">
+    <form method="POST" class="mar-hor-lg">
         <?php
-            $db   = Zend_Db_Table_Abstract::getDefaultAdapter();
-            $rows = $db->fetchAll('SELECT id, name FROM category', array(), Zend_Db::FETCH_OBJ);
-            foreach ($rows as $row) {
-                echo '<option value="', $row->id, '"', ($this->post->category == $row->id ? ' selected' : ''), '>', htmlspecialchars($row->name), '</option>';
+            if ($this->error) {
+                echo '<div class="form-group text-danger">', $this->error, '</div>';
             }
+
+            echo $this->formHidden('id', $this->post->id);
         ?>
-    </select>
-    <input type="text" name="title" placeholder="标题" class="block mar-btm" value="<?php echo htmlspecialchars($this->post->title); ?>">
-    <?php if ($this->post->external_post): ?>
-    <label class="block mar-btm">外部文章</label>
-    <input type="text" name="content" placeholder="http(s)://" value="<?php echo $this->post->content; ?>">
-    <?php else: ?>
-    <div id="editormd">
-        <textarea name="content" class="hide"><?php echo htmlspecialchars($this->post->content); ?></textarea>
-    </div>
-    <?php endif; ?>
-    <p>多个标签使用,号分隔,最多可打10个标签</p>
-    <?php
-        $tags = $db->fetchAll(
-            'SELECT t.name FROM post_tag pt, tag t WHERE pt.post_id = ' . $this->post->id . ' AND pt.tag_id = t.id ORDER BY pt.id ASC',
-            array(),
-            Zend_Db::FETCH_COLUMN
-        );
-        $tags = implode(',', $tags);
-    ?>
-    <input type="text" name="tags" placeholder="标签" class="block mar-btm" value="<?php echo htmlspecialchars($tags); ?>">
-    <button type="submit">提交</button>
-</form>
+        <div class="form-group mw400">
+            <?php echo $this->categoryList($this->post->category); ?>
+        </div>
+        <div class="form-group">
+            <?php
+                echo $this->formText('title', $this->post->title, array(
+                    'class'       => 'form-control',
+                    'placeholder' => '文章标题'
+                ));
+            ?>
+        </div>
+        <?php if ($this->post->external_post): ?>
+        <div class="form-group">
+            <label>外部文章</label>
+            <?php
+                echo $this->formText('content', $this->post->content, array(
+                    'class'       => 'form-control',
+                    'placeholder' => '外部文章链接'
+                ));
+            ?>
+        </div>
+        <?php else: ?>
+        <div id="editormd">
+            <textarea name="content" class="hide"><?php echo $this->escape($this->post->content); ?></textarea>
+        </div>
+        <?php endif; ?>
+        <div class="form-group">
+            <?php
+                $tags = Zend_Db_Table_Abstract::getDefaultAdapter()->fetchAll(
+                    'SELECT t.name FROM post_tag pt, tag t WHERE pt.post_id = ' . $this->post->id . ' AND pt.tag_id = t.id ORDER BY pt.id ASC',
+                    array(),
+                    Zend_Db::FETCH_COLUMN
+                );
+                $tags = implode(',', $tags);
+
+                echo $this->formText('tags', $tags, array(
+                    'class'       => 'form-control',
+                    'placeholder' => '标签'
+                ));
+            ?>
+            <p class="help-block">多个标签使用,号分隔,最多可打10个标签</p>
+        </div>
+        <div class="form-group">
+            <button type="submit" class="btn btn-primary w100">提交</button>
+        </div>
+    </form>
+</div>
 
 <?php
     if (!$this->post->external_post) {

@@ -13,21 +13,7 @@
             }
         ?>
         <div class="form-group mw400">
-            <?php
-                $rows = Zend_Db_Table_Abstract::getDefaultAdapter()->fetchAll('SELECT id, name FROM category');
-                $categoryList = array();
-                foreach ($rows as $row) {
-                    $categoryList[$row['id']] = $row['name'];
-                }
-                echo $this->ourFormSelect(
-                    'category',
-                    '0',
-                    array('class' => 'form-control'),
-                    $categoryList,
-                    true,
-                    '<option value="0">-所属栏目-</option>'
-                );
-            ?>
+            <?php echo $this->categoryList(); ?>
         </div>
         <div class="form-group">
             <?php
