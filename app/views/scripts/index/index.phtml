@@ -2,10 +2,14 @@
     echo $this->headTitle('首页');
 ?>
 
-<div class="text-lft">
-<?php foreach ($this->posts as $post): ?>
-    <a href="/index/post/?id=<?php echo $post->id; ?>" target="_blank" class="block mar-btm">
-        <?php echo htmlspecialchars($post->title); ?>
-    </a>
-    <?php endforeach; ?>
+<div class="container">
+    <div class="post-list">
+        <?php foreach ($this->paginator as $item): ?>
+        <a href="/index/post/?id=<?php echo $item['id']; ?>" target="_blank">
+            <?php echo $this->escape($item['title']); ?>
+        </a>
+        <?php endforeach; ?>
+    </div>
+
+    <?php echo $this->paginator; ?>
 </div>

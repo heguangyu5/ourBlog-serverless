@@ -4,10 +4,10 @@ class IndexController extends OurBlog_Controller_Action
 {
     public function indexAction()
     {
-        $db     = Zend_Db_Table_Abstract::getDefaultAdapter();
-        $select = $db->select()
-                     ->from('posts', array('id', 'title'))
-                     ->order('id DESC');
+        $select = Zend_Db_Table_Abstract::getDefaultAdapter()
+                  ->select()
+                  ->from('posts', array('id', 'title'))
+                  ->order('id DESC');
 
         $category = OurBlog_Util::DBAIPK($this->getQuery('category'));
         if ($category) {
@@ -15,7 +15,7 @@ class IndexController extends OurBlog_Controller_Action
             $this->view->category = $category;
         }
 
-        $this->view->posts = $db->fetchAll($select, array(), Zend_Db::FETCH_OBJ);
+        $this->view->paginator = $this->initPaginator($select);
     }
 
     public function postAction()
