@@ -6,27 +6,38 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <?php echo $this->headTitle('OurBlog')->setSeparator(' - '); ?>
-    <?php echo $this->headLink(); ?>
+    <link rel="stylesheet" href="/bootstrap/3.3.5/css/bootstrap.min.css">
     <link href="/css/style.css" rel="stylesheet">
+    <?php echo $this->headLink(); ?>
 </head>
 <body>
-    <div class="margin-center max-width-1200">
-        <h1 class="border-btm text-lft">
-            <div class="pull-right text-sm" style="padding-top:18px">
-                <a href="javascript:void(0);"><?php echo htmlspecialchars($_SESSION['email']); ?></a>
-                <a href="/logout/">退出</a>
-            </div>
-            <a href="/admin/" class="no-underline mar-rgt-lg">OurBlog</a>
-            <a href="/admin/" class="text-sm">博文管理</a>
-            <a href="/admin/add/" class="text-sm">写博文</a>
-            <a href="/" class="text-sm" target="_blank">前台首页</a>
-        </h1>
+    <nav class="navbar navbar-inverse">
+        <div class="container">
+            <ul class="nav navbar-nav">
+                <?php
+                    $request = Zend_Controller_Front::getInstance()->getRequest();
+                    $controllerName = $request->getControllerName();
+                    $actionName     = $request->getActionName();
+                ?>
+                <li<?php echo ($controllerName == 'admin' && $actionName == 'index') ? ' class="active"' : ''; ?>>
+                    <a href="/admin/">文章列表</a>
+                </li>
+                <li<?php echo ($controllerName == 'admin' && $actionName == 'add') ? ' class="active"' : ''; ?>>
+                    <a href="/admin/add/">写文章</a>
+                </li>
+                <li><a href="/" target="_blank">前台首页</a>
+            </ul>
+            <p class="navbar-text navbar-right">
+                <?php echo $this->escape($_SESSION['email']); ?>
+                <a href="/logout" class="navbar-link">退出</a>
+            </p>
+        </div>
+    </nav>
 
-        <?php echo $this->layout()->content; ?>
-
-    </div>
+    <?php echo $this->layout()->content; ?>
 
     <script src="/js/jquery-3.0.0.min.js"></script>
+    <script src="/bootstrap/3.3.5/js/bootstrap.min.js"></script>
     <?php echo $this->headScript(); ?>
 </body>
 </html>

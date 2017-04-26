@@ -4,9 +4,16 @@
 .mw400 {
     max-width: 400px;
 }
+.mw1500 {
+    max-width: 1600px;
+}
 .margin-center {
     margin-left: auto;
     margin-right: auto;
+}
+.mar-hor-lg {
+    margin-left: 30px;
+    margin-right: 30px;
 }
 
 /*body {

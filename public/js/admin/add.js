@@ -17,13 +17,11 @@ $(document).ready(function () {
     });
     $('#externalPost').click(function () {
         if ($(this).prop('checked')) {
-            $('#editormd').hide();
-            $('#editormd > textarea').removeAttr('name');
-            $('#externalPostUrl').attr('type', 'text').attr('name', 'content');
+            $('#editormd').addClass('hide').find('> textarea').removeAttr('name');
+            $('#externalPostUrl').attr('name', 'content').parent().removeClass('hide');
         } else {
-            $('#externalPostUrl').attr('type', 'hidden').removeAttr('name');
-            $('#editormd > textarea').attr('name', 'content');
-            $('#editormd').show();
+            $('#externalPostUrl').removeAttr('name').parent().addClass('hide');
+            $('#editormd > textarea').attr('name', 'content').parent().removeClass('hide');
         }
     });
 });
