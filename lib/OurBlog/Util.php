@@ -14,7 +14,7 @@ class OurBlog_Util
         if (!isset($_SERVER['HTTP_REFERER'])) {
             throw new InvalidArgumentException('missing HTTP_REFERER');
         }
-        if (!preg_match('#^http://([^/]+)#', $_SERVER['HTTP_REFERER'], $matches)) {
+        if (!preg_match('#^https?://([^/]+)#', $_SERVER['HTTP_REFERER'], $matches)) {
             throw new InvalidArgumentException('invalid HTTP_REFERER');
         }
         if ($_SERVER['SERVER_NAME'] != $matches[1]) {
