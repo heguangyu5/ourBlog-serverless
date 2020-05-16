@@ -15,5 +15,7 @@ class OurBlog_BaseDbTables_InitTest extends OurBlog_DatabaseTestCase
     }
 
     public function testNothing()
-    {}
+    {
+        $this->assertTrue(true);
+    }
 }

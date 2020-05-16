@@ -2,23 +2,26 @@
 /**
  * @group auth
  */
-class OurBlog_AuthTest extends PHPUnit_Framework_TestCase
+class OurBlog_AuthTest extends OurBlog_DatabaseTestCase
 {
-    /**
-     * @expectedException InvalidArgumentException
-     * @expectedExceptionMessage invalid email, length limit 5~200
-     */
+    public function getDataSet()
+    {
+        return $this->createArrayDataSet(array());
+    }
+
     public function testEmailMinLenthIs5()
     {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('invalid email, length limit 5~200');
+
         new OurBlog_Auth('a@bb', '');
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     * @expectedExceptionMessage invalid email, length limit 5~200
-     */
     public function testEmailMaxLenthIs200()
     {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('invalid email, length limit 5~200');
+
         new OurBlog_Auth(
             str_pad('a@b.com', 201, 'a', STR_PAD_LEFT),
             ''
@@ -36,30 +39,29 @@ class OurBlog_AuthTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException InvalidArgumentException
-     * @expectedExceptionMessage email format wrong
      * @dataProvider invalidEmailFormats
      */
     public function testEmailFormat($email)
     {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('email format wrong');
+
         new OurBlog_Auth($email, '');
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     * @expectedExceptionMessage invalid password, length limit 6~50
-     */
     public function testPasswordMinLenthIs6()
     {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('invalid password, length limit 6~50');
+
         new OurBlog_Auth('heguangyu5@qq.com', '12345');
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     * @expectedExceptionMessage invalid password, length limit 6~50
-     */
     public function testPasswordMaxLenthIs50()
     {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('invalid password, length limit 6~50');
+
         new OurBlog_Auth('heguangyu5@qq.com', str_pad('12345', 51, '6'));
     }
 

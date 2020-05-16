@@ -21,12 +21,13 @@ class OurBlog_Post_DeleteTest extends OurBlog_DatabaseTestCase
     }
 
     /**
-     * @expectedException InvalidArgumentException
-     * @expectedExceptionMessage invalid id
      * @dataProvider invalidPostIds
      */
     public function testIdShouldBeDBAIPK($id)
     {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('invalid id');
+
         $post = new OurBlog_Post(1);
         $post->delete($id);
     }
@@ -42,12 +43,11 @@ class OurBlog_Post_DeleteTest extends OurBlog_DatabaseTestCase
         $this->assertDataSetsEqual($expectedDataSet, $dataSet);
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     * @expectedExceptionMessage you can only delete your own post
-     */
     public function testUserCannotDeleteOthersPost()
     {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('you can only delete your own post');
+
         $post = new OurBlog_Post(1);
         $post->delete(2);
     }

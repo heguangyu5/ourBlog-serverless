@@ -1,4 +1,4 @@
-<phpunit bootstrap="bootstrap.php" convertErrorsToExceptions="true" stopOnFailure="true">
+<phpunit bootstrap="bootstrap.php" convertErrorsToExceptions="true" stopOnFailure="true" cacheResult="false">
     <testsuites>
         <testsuite name="OurBlog">
             <directory>OurBlog</directory>

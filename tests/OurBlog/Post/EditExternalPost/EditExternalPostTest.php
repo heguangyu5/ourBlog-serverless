@@ -25,7 +25,7 @@ class OurBlog_Post_EditExternalPostTest extends OurBlog_DatabaseTestCase
         $expectedDataSet = $this->createArrayDataSet(include __DIR__ . '/expects.php');
 
         $dataSet = $this->getConnection()->createDataSet(array('posts', 'tag', 'post_tag'));
-        $filterDataSet = new PHPUnit_Extensions_Database_DataSet_DataSetFilter($dataSet);
+        $filterDataSet = new PHPUnit_DbUnit_DataSet_FilterDataSet($dataSet);
         $filterDataSet->setExcludeColumnsForTable('posts', array('update_date'));
 
         $this->assertDataSetsEqual($expectedDataSet, $filterDataSet);

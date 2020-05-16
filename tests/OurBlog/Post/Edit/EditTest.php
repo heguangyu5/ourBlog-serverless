@@ -13,12 +13,11 @@ class OurBlog_Post_EditTest extends OurBlog_DatabaseTestCase
         return $this->createArrayDataSet(include __DIR__ . '/fixtures.php');
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     * @expectedExceptionMessage missing required key id
-     */
     public function testIdCannotMissing()
     {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('missing required key id');
+
         unset($this->data['id']);
 
         $post = new OurBlog_Post(1);
@@ -37,12 +36,13 @@ class OurBlog_Post_EditTest extends OurBlog_DatabaseTestCase
     }
 
     /**
-     * @expectedException InvalidArgumentException
-     * @expectedExceptionMessage invalid id
      * @dataProvider invalidPostIds
      */
     public function testIdShouldBeDBAIPK($id)
     {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('invalid id');
+
         $this->data['id'] = $id;
 
         $post = new OurBlog_Post(1);
@@ -57,18 +57,17 @@ class OurBlog_Post_EditTest extends OurBlog_DatabaseTestCase
         $expectedDataSet = $this->createArrayDataSet(include __DIR__ . '/expects.php');
 
         $dataSet = $this->getConnection()->createDataSet(array('posts', 'tag', 'post_tag'));
-        $filterDataSet = new PHPUnit_Extensions_Database_DataSet_DataSetFilter($dataSet);
+        $filterDataSet = new PHPUnit_DbUnit_DataSet_FilterDataSet($dataSet);
         $filterDataSet->setExcludeColumnsForTable('posts', array('update_date'));
 
         $this->assertDataSetsEqual($expectedDataSet, $filterDataSet);
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     * @expectedExceptionMessage you can only edit your own post
-     */
     public function testUserCannotEditOthersPost()
     {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('you can only edit your own post');
+
         $post = new OurBlog_Post(2);
         $post->edit($this->data);
     }
@@ -83,7 +82,7 @@ class OurBlog_Post_EditTest extends OurBlog_DatabaseTestCase
         $expectedDataSet = $this->createArrayDataSet(include __DIR__ . '/expects-delete-all-tags.php');
 
         $dataSet = $this->getConnection()->createDataSet(array('posts', 'tag', 'post_tag'));
-        $filterDataSet = new PHPUnit_Extensions_Database_DataSet_DataSetFilter($dataSet);
+        $filterDataSet = new PHPUnit_DbUnit_DataSet_FilterDataSet($dataSet);
         $filterDataSet->setExcludeColumnsForTable('posts', array('update_date'));
 
         $this->assertDataSetsEqual($expectedDataSet, $filterDataSet);
@@ -99,7 +98,7 @@ class OurBlog_Post_EditTest extends OurBlog_DatabaseTestCase
         $expectedDataSet = $this->createArrayDataSet(include __DIR__ . '/expects-add-exist-tags.php');
 
         $dataSet = $this->getConnection()->createDataSet(array('posts', 'tag', 'post_tag'));
-        $filterDataSet = new PHPUnit_Extensions_Database_DataSet_DataSetFilter($dataSet);
+        $filterDataSet = new PHPUnit_DbUnit_DataSet_FilterDataSet($dataSet);
         $filterDataSet->setExcludeColumnsForTable('posts', array('update_date'));
 
         $this->assertDataSetsEqual($expectedDataSet, $filterDataSet);

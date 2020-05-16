@@ -25,72 +25,65 @@ class OurBlog_Post_AddTest extends OurBlog_DatabaseTestCase
         ));
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     * @expectedExceptionMessage missing required key category
-     */
     public function testCategoryCannotMissing()
     {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('missing required key category');
+
         unset($this->data['category']);
         self::$post->add($this->data);
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     * @expectedExceptionMessage category required
-     */
     public function testCategoryIsRequried()
     {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('category required');
+
         $this->data['category'] = '';
         self::$post->add($this->data);
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     * @expectedExceptionMessage missing required key title
-     */
     public function testTitleCannotMissing()
     {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('missing required key title');
+
         unset($this->data['title']);
         self::$post->add($this->data);
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     * @expectedExceptionMessage title required
-     */
     public function testTitleIsRequried()
     {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('title required');
+
         $this->data['title'] = '';
         self::$post->add($this->data);
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     * @expectedExceptionMessage missing required key content
-     */
     public function testContentCannotMissing()
     {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('missing required key content');
+
         unset($this->data['content']);
         self::$post->add($this->data);
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     * @expectedExceptionMessage content required
-     */
     public function testContentIsRequried()
     {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('content required');
+
         $this->data['content'] = '';
         self::$post->add($this->data);
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     * @expectedExceptionMessage missing required key tags
-     */
     public function testTagsCannotMissing()
     {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('missing required key tags');
+
         unset($this->data['tags']);
         self::$post->add($this->data);
     }
@@ -107,74 +100,69 @@ class OurBlog_Post_AddTest extends OurBlog_DatabaseTestCase
     }
 
     /**
-     * @expectedException InvalidArgumentException
-     * @expectedExceptionMessage invalid category
      * @dataProvider invalidCategoryIds
      */
     public function testCategoryShouldBeDBAIPK($category)
     {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('invalid category');
+
         $this->data['category'] = $category;
         self::$post->add($this->data);
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     * @expectedExceptionMessage title maxlength is 500
-     */
     public function testTitleMaxLengthIs500()
     {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('title maxlength is 500');
+
         $this->data['title'] = $this->data['title']
                                . str_pad('a', 501 - mb_strlen($this->data['title'], 'UTF-8'), 'a');
         self::$post->add($this->data);
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     * @expectedExceptionMessage content maxlength is 64000
-     */
     public function testContentMaxLengthIs64000()
     {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('content maxlength is 64000');
+
         $this->data['content'] = $this->data['content']
                                . str_pad('a', 64001 - strlen($this->data['content']), 'a');
         self::$post->add($this->data);
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     * @expectedExceptionMessage tags too long
-     */
     public function testTagsMaxLengthIs600()
     {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('tags too long');
+
         $this->data['tags'] = str_repeat('123456789,', 60) . ',';
         self::$post->add($this->data);
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     * @expectedExceptionMessage too many tags
-     */
     public function testTagsMaxLimitIs10()
     {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('too many tags');
+
         $this->data['tags'] = 'tag1,tag2,tag3,tag4,tag5,tag6,tag7,tag8,tag9,tag10,tag11';
         self::$post->add($this->data);
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     * @expectedExceptionMessage tag too long
-     */
     public function testTagMaxLenthIs50()
     {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('tag too long');
+
         $this->data['tags'] = str_pad('a', 51, 'a');
         self::$post->add($this->data);
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     * @expectedExceptionMessage external post url too long
-     */
     public function testExtenalPostLinkMaxLengthIs1000()
     {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('external post url too long');
+
         $this->data['externalPost'] = 1;
         $this->data['content'] = 'http://www.ourats.com/post/details/?id=133&pad='
                                  . str_pad('a', 1001 - strlen('http://www.ourats.com/post/details/?id=133&pad='), 'a');
@@ -192,12 +180,13 @@ class OurBlog_Post_AddTest extends OurBlog_DatabaseTestCase
     }
 
     /**
-     * @expectedException InvalidArgumentException
-     * @expectedExceptionMessage invalid external post url
      * @dataProvider invalidExternalPostUrl
      */
     public function testExtenalPostLinkShouldBeHttpOrHttps($url)
     {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('invalid external post url');
+
         $this->data['externalPost'] = 1;
         $this->data['content'] = $url;
 
@@ -211,7 +200,7 @@ class OurBlog_Post_AddTest extends OurBlog_DatabaseTestCase
         $expectedDataSet = $this->createArrayDataSet(include __DIR__ . '/expects-without-tag.php');
 
         $dataSet = $this->getConnection()->createDataSet(array('posts', 'tag'));
-        $filterDataSet = new PHPUnit_Extensions_Database_DataSet_DataSetFilter($dataSet);
+        $filterDataSet = new PHPUnit_DbUnit_DataSet_FilterDataSet($dataSet);
         $filterDataSet->setExcludeColumnsForTable('posts', array('create_date', 'update_date'));
 
         $this->assertDataSetsEqual($expectedDataSet, $filterDataSet);
@@ -226,7 +215,7 @@ class OurBlog_Post_AddTest extends OurBlog_DatabaseTestCase
         $expectedDataSet = $this->createArrayDataSet(include __DIR__ . '/expects-with-all-new-tags.php');
 
         $dataSet = $this->getConnection()->createDataSet(array('posts', 'tag', 'post_tag'));
-        $filterDataSet = new PHPUnit_Extensions_Database_DataSet_DataSetFilter($dataSet);
+        $filterDataSet = new PHPUnit_DbUnit_DataSet_FilterDataSet($dataSet);
         $filterDataSet->setExcludeColumnsForTable('posts', array('create_date', 'update_date'));
 
         $this->assertDataSetsEqual($expectedDataSet, $filterDataSet);
@@ -240,7 +229,7 @@ class OurBlog_Post_AddTest extends OurBlog_DatabaseTestCase
         $expectedDataSet = $this->createArrayDataSet(include __DIR__ . '/expects-with-some-new-tags.php');
 
         $dataSet = $this->getConnection()->createDataSet(array('posts', 'tag', 'post_tag'));
-        $filterDataSet = new PHPUnit_Extensions_Database_DataSet_DataSetFilter($dataSet);
+        $filterDataSet = new PHPUnit_DbUnit_DataSet_FilterDataSet($dataSet);
         $filterDataSet->setExcludeColumnsForTable('posts', array('create_date', 'update_date'));
 
         $this->assertDataSetsEqual($expectedDataSet, $filterDataSet);
@@ -261,7 +250,7 @@ class OurBlog_Post_AddTest extends OurBlog_DatabaseTestCase
         $expectedDataSet = $this->createArrayDataSet(include __DIR__ . '/expects-external-post.php');
 
         $dataSet = $this->getConnection()->createDataSet(array('posts', 'tag', 'post_tag'));
-        $filterDataSet = new PHPUnit_Extensions_Database_DataSet_DataSetFilter($dataSet);
+        $filterDataSet = new PHPUnit_DbUnit_DataSet_FilterDataSet($dataSet);
         $filterDataSet->setExcludeColumnsForTable('posts', array('create_date', 'update_date'));
 
         $this->assertDataSetsEqual($expectedDataSet, $filterDataSet);
