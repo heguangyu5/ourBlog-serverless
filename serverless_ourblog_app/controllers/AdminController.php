@@ -3,14 +3,14 @@
 class AdminController extends OurBlog_Controller_Action_PostLogin
 {
     public function indexAction()
-    {
+    {/*
         $select = Zend_Db_Table_Abstract::getDefaultAdapter()
                   ->select()
                   ->from('posts', array('id', 'title'))
                   ->where('uid = ' . $this->uid)
                   ->order('id DESC');
 
-        $this->view->paginator = $this->initPaginator($select);
+        $this->view->paginator = $this->initPaginator($select);*/
     }
 
     public function addAction()

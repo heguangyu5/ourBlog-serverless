@@ -19,6 +19,8 @@ function main_handler($event, $context)
             'REQUEST_METHOD'  => $event->httpMethod,
             'REQUEST_URI'     => $path . '?' . http_build_query($event->queryString),
             'HTTP_HOST'       => $event->headers->host,
+            'SERVER_NAME'     => $event->headers->host,
+            'HTTP_REFERER'    => isset($event->headers->referer) ? $event->headers->referer : '',
             'HTTP_USER_AGENT' => isset($event->headers->{'user-agent'}) ? $event->headers->{'user-agent'} : '',
             'REMOTE_ADDR'     => $event->requestContext->sourceIp
         );

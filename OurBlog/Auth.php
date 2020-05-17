@@ -29,16 +29,31 @@ class OurBlog_Auth implements Zend_Auth_Adapter_Interface
     }
 
     public function authenticate()
-    {
+    {/*
         $uid = Zend_Db_Table_Abstract::getDefaultAdapter()->fetchOne(
             'SELECT uid FROM user WHERE email = ? AND password = ?',
             array($this->email, md5(self::SALT . '-' . $this->password))
         );
-
+*/
+        $uid = 0;
+        if ($this->email == 'heguangyu5@qq.com' && $this->password == '123456') {
+            $uid = 1;
+        }
         if ($uid) {
-            return new Zend_Auth_Result(Zend_Auth_Result::SUCCESS, $uid);
+            return new Zend_Auth_Result(
+                Zend_Auth_Result::SUCCESS,
+                array(
+                    'uid' => $uid,
+                    'ost' => md5(self::SALT . '-OST-' . $uid)
+                )
+            );
         }
 
-        return new Zend_Auth_Result(Zend_Auth_Result::FAILURE, 0);
+        return new Zend_Auth_Result(Zend_Auth_Result::FAILURE, null);
+    }
+
+    public static function isValidOST($ost, $uid)
+    {
+        return md5(self::SALT . '-OST-' . $uid) == $ost;
     }
 }

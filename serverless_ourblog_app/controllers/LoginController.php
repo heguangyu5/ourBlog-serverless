@@ -4,9 +4,10 @@ class LoginController extends OurBlog_Controller_Action
 {
     public function preDispatch()
     {
-        $auth = Zend_Auth::getInstance();
-        if ($auth->hasIdentity()) {
-            $this->redirect('/admin/');
+        parent::preDispatch();
+
+        if (Zend_Auth::getInstance()->hasIdentity()) {
+            $this->redirect('/admin/', array('exit' => false));
         }
     }
 
@@ -19,9 +20,12 @@ class LoginController extends OurBlog_Controller_Action
                 $adapter = new OurBlog_Auth($this->getPost('email'), $this->getPost('password'));
                 $result  = $auth->authenticate($adapter);
                 if ($result->isValid()) {
-                    session_regenerate_id(true);
-                    $_SESSION['email'] = $_POST['email'];
-                    $this->redirect('/admin/');
+                    $identity = $result->getIdentity();
+                    $this->redirect(
+                        '/admin?uid=' . $identity['uid'] . '&ost=' . $identity['ost'],
+                        array('exit' => false)
+                    );
+                    return;
                 }
                 $this->view->error = '用户名或密码不对';
             } catch (InvalidArgumentException $e) {

@@ -28,8 +28,10 @@
                 <li><a href="<?php echo $this->baseUrl(); ?>/" target="_blank">前台首页</a>
             </ul>
             <p class="navbar-text navbar-right">
-                <?php echo $this->escape($_SESSION['email']); ?>
-                <a href="<?php echo $this->baseUrl(); ?>/logout" class="navbar-link">退出</a>
+                <?php
+                    // echo user email fetch from db
+                    echo 'heguangyu5@qq.com';
+                ?>
             </p>
         </div>
     </nav>

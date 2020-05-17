@@ -2,6 +2,20 @@
 
 class OurBlog_Controller_Action extends Zend_Controller_Action
 {
+    public function preDispatch()
+    {
+        $storage = new Zend_Auth_Storage_NonPersistent();
+        $uid = $this->getParam('uid');
+        $ost = $this->getParam('ost');
+        if ($uid && $ost && OurBlog_Auth::isValidOST($ost, $uid)) {
+            $storage->write(array(
+                'uid' => $uid,
+                'ost' => $ost
+            ));
+        }
+        Zend_Auth::getInstance()->setStorage($storage);
+    }
+
     public function getQuery($key = null, $default = null)
     {
         return $this->getRequest()->getQuery($key, $default);
