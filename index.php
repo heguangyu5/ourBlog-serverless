@@ -29,7 +29,7 @@ function main_handler($event, $context)
             if (   $event->headers->{'content-type'} == 'application/x-www-form-urlencoded'
                 && $event->body
             ) {
-                $_POST = parse_str($event->body, $_POST);
+                parse_str($event->body, $_POST);
             }
         }
     } else {
