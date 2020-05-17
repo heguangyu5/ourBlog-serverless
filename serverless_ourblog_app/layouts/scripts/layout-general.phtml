@@ -6,8 +6,8 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <?php echo $this->headTitle('OurBlog')->setSeparator(' - '); ?>
-    <link rel="stylesheet" href="/bootstrap/3.3.5/css/bootstrap.min.css">
-    <link href="/css/style.css" rel="stylesheet">
+    <link rel="stylesheet" href="<?php echo $this->baseUrl(); ?>/bootstrap/3.3.5/css/bootstrap.min.css">
+    <link href="<?php echo $this->baseUrl(); ?>/css/style.css" rel="stylesheet">
     <?php echo $this->headLink(); ?>
 </head>
 <body>
@@ -19,8 +19,8 @@
         <?php echo $this->layout()->content; ?>
     </div>
 
-    <script src="/js/jquery-3.0.0.min.js"></script>
-    <script src="/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+    <script src="<?php echo $this->baseUrl(); ?>/js/jquery-3.0.0.min.js"></script>
+    <script src="<?php echo $this->baseUrl(); ?>/bootstrap/3.3.5/js/bootstrap.min.js"></script>
     <?php echo $this->headScript(); ?>
 </body>
 </html>

@@ -6,8 +6,8 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <?php echo $this->headTitle('OurBlog')->setSeparator(' - '); ?>
-    <link rel="stylesheet" href="/bootstrap/3.3.5/css/bootstrap.min.css">
-    <link href="/css/style.css" rel="stylesheet">
+    <link rel="stylesheet" href="<?php echo $this->baseUrl(); ?>/bootstrap/3.3.5/css/bootstrap.min.css">
+    <link href="<?php echo $this->baseUrl(); ?>/css/style.css" rel="stylesheet">
     <?php echo $this->headLink(); ?>
 </head>
 <body>
@@ -23,13 +23,13 @@
             <div class="collapse navbar-collapse" id="category-nav">
                 <ul class="nav navbar-nav">
                     <li<?php echo $this->category ? '' : ' class="active"'; ?>>
-                        <a href="/">Home</a>
+                        <a href="<?php echo $this->baseUrl(); ?>/">Home</a>
                     </li>
                     <?php
                         $rows = Zend_Db_Table_Abstract::getDefaultAdapter()->fetchAll('SELECT id, name FROM category', array(), Zend_Db::FETCH_OBJ);
                         foreach ($rows as $row) {
                             echo '<li', ($this->category == $row->id ? ' class="active"' : ''), '>',
-                                    '<a href="/?category=', $row->id, '">',
+                                    '<a href="', $this->baseUrl(), '/?category=', $row->id, '">',
                                         $this->escape($row->name),
                                     '</a>',
                                  '</li>';
@@ -44,8 +44,8 @@
         <?php echo $this->layout()->content; ?>
     </div>
 
-    <script src="/js/jquery-3.0.0.min.js"></script>
-    <script src="/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+    <script src="<?php echo $this->baseUrl(); ?>/js/jquery-3.0.0.min.js"></script>
+    <script src="<?php echo $this->baseUrl(); ?>/bootstrap/3.3.5/js/bootstrap.min.js"></script>
     <?php echo $this->headScript(); ?>
 </body>
 </html>
