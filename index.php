@@ -46,18 +46,18 @@ function main_handler($event, $context)
             $controller = $moduleControllerAction[2];
             $action     = $moduleControllerAction[3];
         }
-        $module     = str_replace('-', ' ', $module);
-        $module     = str_replace(' ', '', ucwords($module));
         $controller = str_replace('-', ' ', $controller);
         $controller = str_replace(' ', '', ucwords($controller));
         $action     = str_replace('-', ' ', $action);
-        $action     = str_replace(' ', '', ucwords($action));
+        $action     = lcfirst(str_replace(' ', '', ucwords($action)));
     } else {
         return array('response' => 'BAD_REQUEST');
     }
     $controllerClassName = $controller . 'Controller';
     if ($module != 'default') {
-        $controllerClassName = $module . '_' . $controllerClassName;
+        $modulePrefix = str_replace('-', ' ', $module);
+        $modulePrefix = str_replace(' ', '', ucwords($modulePrefix));
+        $controllerClassName = $modulePrefix . '_' . $controllerClassName;
     }
     if (!class_exists($controllerClassName, false)) {
         $controllerPath = APP_MODULE_PATH . '/' . $module . '/' . $controller . 'Controller.php';
@@ -115,4 +115,36 @@ function main_handler($event, $context)
         echo "--\$_POST--\n\n";
         var_export($_POST);
     }
+}
+
+if (getenv('APPLICATION_ENV') == 'development') {
+    // event
+    $event = new stdClass();
+    $event->path = $_SERVER['REQUEST_URI'];
+    $pos = strpos($event->path, '?');
+    if ($pos) {
+        $event->path = substr($event->path, 0, $pos);
+    }
+    $event->queryString = $_GET;
+    $event->httpMethod  = $_SERVER['REQUEST_METHOD'];
+    // headers
+    $event->headers = new stdClass();
+    $event->headers->host = $_SERVER['HTTP_HOST'];
+    if (isset($_SERVER['HTTP_REFERER'])) {
+        $event->header->referer = $_SERVER['HTTP_REFERER'];
+    }
+    $event->headers->{'user-agent'}   = $_SERVER['HTTP_USER_AGENT'];
+    if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+        $event->headers->{'content-type'} = 'application/x-www-form-urlencoded';
+        $event->body = file_get_contents('php://input');
+    }
+    // requestContext
+    $event->requestContext = new stdClass();
+    $event->requestContext->sourceIp = $_SERVER['REMOTE_ADDR'];
+    $event->requestContext->path     = '';
+    // context
+    $context = new stdClass();
+    $res = main_handler($event, $context);
+    header('Content-Type: application/json; charset=UTF-8');
+    echo json_encode($res);
 }
