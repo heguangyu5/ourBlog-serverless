@@ -89,18 +89,30 @@ function main_handler($event, $context)
         $_POST = array();
     }
     // call
-    $controller = new $controllerClassName();
-    if (method_exists($controller, 'init')) {
-        $res = $controller->init();
-        if ($res !== null) {
-            return $res;
+    try {
+        $controller = new $controllerClassName();
+        if (method_exists($controller, 'init')) {
+            $res = $controller->init();
+            if ($res !== null) {
+                return $res;
+            }
         }
-    }
-    if (method_exists($controller, 'preDispatch')) {
-        $res = $controller->preDispatch();
-        if ($res !== null) {
-            return $res;
+        if (method_exists($controller, 'preDispatch')) {
+            $res = $controller->preDispatch();
+            if ($res !== null) {
+                return $res;
+            }
         }
+        return $controller->$actionName();
+    } catch (Exception $e) {
+        echo "--Exception Message--\n\n";
+        echo $e->getMessage(), "\n\n";
+        echo "--Exception Trace--\n\n";
+        echo $e->getTraceAsString(), "\n\n";
+        echo "--\$_GET--\n\n";
+        var_export($_GET);
+        echo "\n\n";
+        echo "--\$_POST--\n\n";
+        var_export($_POST);
     }
-    return $controller->$actionName();
 }
