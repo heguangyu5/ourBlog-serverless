@@ -1,123 +1,106 @@
 <?php
 
-define('APPLICATION_PATH', '/opt/serverless_ourblog_app');
-define('APPLICATION_ENV', (getenv('APPLICATION_ENV') ? getenv('APPLICATION_ENV') : 'production'));
+define('APP_NAME',        'OurBlog');
+define('APP_PATH',        '/opt/' . APP_NAME);
+define('APP_MODULE_PATH', APP_PATH . '/module');
+define('APP_LIB_PATH',    APP_PATH . '/lib');
 
 set_include_path('/opt' . PATH_SEPARATOR . get_include_path());
 
-require_once 'Zend/Application.php';
+spl_autoload_register(function ($class) {
+    include APP_LIB_PATH . '/' . str_replace('_', '/', $class) . '.php';
+}, true, true);
 
 function main_handler($event, $context)
 {
-    if (APPLICATION_ENV != 'development') {
-        $path = substr($event->path, strlen($event->requestContext->path));
-        if ($path == '') {
-            $path = '/';
-        }
-        $_SERVER += array(
-            'HTTPS'           => 'on',
-            'REQUEST_METHOD'  => $event->httpMethod,
-            'REQUEST_URI'     => $path . '?' . http_build_query($event->queryString),
-            'HTTP_HOST'       => $event->headers->host,
-            'SERVER_NAME'     => $event->headers->host,
-            'HTTP_REFERER'    => isset($event->headers->referer) ? $event->headers->referer : '',
-            'HTTP_USER_AGENT' => isset($event->headers->{'user-agent'}) ? $event->headers->{'user-agent'} : '',
-            'REMOTE_ADDR'     => $event->requestContext->sourceIp
-        );
-        $_GET = (array)$event->queryString;
-        if ($event->httpMethod == 'POST') {
-            if (   $event->headers->{'content-type'} == 'application/x-www-form-urlencoded'
-                && $event->body
-            ) {
-                parse_str($event->body, $_POST);
-            }
-        }
-    } else {
-        $pos = strpos($_SERVER['REQUEST_URI'], '?');
-        if ($pos) {
-            $path = substr($_SERVER['REQUEST_URI'], 0, $pos);
-        } else {
-            $path = $_SERVER['REQUEST_URI'];
-        }
-    }
-
-    $path = '/opt/serverless_ourblog_assets' . $path;
-    if (is_file($path)) {
-        $mimeTypes = array(
-            'css' => 'text/css; charset=utf8',
-            'js'  => 'application/javascript; charset=utf8',
-            'jpg' => 'image/jpeg',
-            'png' => 'image/png',
-            'gif' => 'image/gif'
-        );
-        $ext = pathinfo($path, PATHINFO_EXTENSION);
-        if (APPLICATION_ENV != 'development') {
-            if (isset($mimeTypes[$ext])) {
-                return array(
-                    'isBase64Encoded' => false,
-                    'statusCode'      => 200,
-                    'headers'         => array('Content-Type' => $mimeTypes[$ext]),
-                    'body'            => file_get_contents($path)
-                );
-            } else {
-                return array(
-                    'isBase64Encoded' => false,
-                    'statusCode'      => 404,
-                    'headers'         => array('Content-Type' => 'text/plain'),
-                    'body'            => 'File Not Found'
-                );
-            }
-        } else {
-            if (isset($mimeTypes[$ext])) {
-                header('Content-Type: ' . $mimeTypes[$ext]);
-                readfile($path);
-            } else {
-                header('HTTP/1.1 404 Not Found');
-            }
-            return;
-        }
-    }
-
-    $app = new Zend_Application(
-        APPLICATION_ENV,
-        array(
-            'autoloadernamespaces' => array('OurBlog_'),
-            'resources' => array(
-                'frontController' => array('controllerDirectory' => APPLICATION_PATH . '/controllers'),
-                'layout' => array('layoutpath' => APPLICATION_PATH . '/layouts/scripts')
-            )
-        )
+    // $_SERVER
+    $_SERVER = array(
+        'HTTP_HOST'       => $event->headers->host,
+        'SERVER_NAME'     => $event->headers->host,
+        'HTTP_REFERER'    => isset($event->headers->referer) ? $event->headers->referer : '',
+        'HTTP_USER_AGENT' => isset($event->headers->{'user-agent'}) ? $event->headers->{'user-agent'} : '',
+        'REMOTE_ADDR'     => $event->requestContext->sourceIp
+    ) + $_SERVER;
+    // /module/controller/action
+    $moduleControllerAction = rtrim(
+        substr($event->path, strlen($event->requestContext->path)),
+        '/'
     );
-
-    $bootstrap = $app->getBootstrap();
-    $bootstrap->bootstrap();
-
-    $front = $bootstrap->getResource('frontController');
-    $front->returnResponse(true);
-    if (APPLICATION_ENV != 'development') {
-        $front->setBaseUrl('/' . $event->requestContext->stage . $event->requestContext->path);
-    }
-
-    $response = $bootstrap->run();
-
-    if (APPLICATION_ENV != 'development') {
-        $headers = array();
-        foreach ($response->getHeaders() as $header) {
-            if ($header['replace'] || !isset($headers[$header['name']])) {
-                $headers[$header['name']] = $header['value'];
-            }
+    if ($moduleControllerAction == '') {
+        $module     = 'default';
+        $controller = 'index';
+        $action     = 'index';
+    } elseif (preg_match('#^(/[-a-zA-Z0-9]+){1,3}$#', $moduleControllerAction)) {
+        $moduleControllerAction = explode('/', $moduleControllerAction);
+        $count = count($moduleControllerAction);
+        if ($count == 2) {
+            $module     = 'default';
+            $controller = $moduleControllerAction[1];
+            $action     = 'index';
+        } elseif ($count == 3) {
+            $module     = 'default';
+            $controller = $moduleControllerAction[1];
+            $action     = $moduleControllerAction[2];
+        } elseif ($count == 4) {
+            $module     = $moduleControllerAction[1];
+            $controller = $moduleControllerAction[2];
+            $action     = $moduleControllerAction[3];
         }
-        return array(
-            'isBase64Encoded' => false,
-            'statusCode'      => $response->getHttpResponseCode(),
-            'headers'         => $headers + array('Content-Type' => 'text/html'),
-            'body'            => $response->getBody()
-        );
+        $module     = str_replace('-', ' ', $module);
+        $module     = str_replace(' ', '', ucwords($module));
+        $controller = str_replace('-', ' ', $controller);
+        $controller = str_replace(' ', '', ucwords($controller));
+        $action     = str_replace('-', ' ', $action);
+        $action     = str_replace(' ', '', ucwords($action));
     } else {
-        $response->sendResponse();
+        return array('response' => 'BAD_REQUEST');
     }
-}
-
-if (APPLICATION_ENV == 'development') {
-    main_handler(null, null);
+    $controllerClassName = $controller . 'Controller';
+    if ($module != 'default') {
+        $controllerClassName = $module . '_' . $controllerClassName;
+    }
+    if (!class_exists($controllerClassName, false)) {
+        $controllerPath = APP_MODULE_PATH . '/' . $module . '/' . $controller . 'Controller.php';
+        if (is_file($controllerPath)) {
+            include $controllerPath;
+            if (!class_exists($controllerClassName, false)) {
+                return array('response' => '404');
+            }
+        } else {
+            return array('response' => '404');
+        }
+    }
+    $actionName = $action . 'Action';
+    if (!method_exists($controllerClassName, $actionName)) {
+        return array('response' => '404');
+    }
+    // $_GET
+    $_GET = (array)$event->queryString;
+    // $_POST
+    if ($event->httpMethod == 'POST') {
+        if (   $event->headers->{'content-type'} == 'application/x-www-form-urlencoded'
+            && $event->body
+        ) {
+            parse_str($event->body, $_POST);
+        } else {
+            $_POST = array();
+        }
+    } else {
+        $_POST = array();
+    }
+    // call
+    $controller = new $controllerClassName();
+    if (method_exists($controller, 'init')) {
+        $res = $controller->init();
+        if ($res !== null) {
+            return $res;
+        }
+    }
+    if (method_exists($controller, 'preDispatch')) {
+        $res = $controller->preDispatch();
+        if ($res !== null) {
+            return $res;
+        }
+    }
+    return $controller->$actionName();
 }
