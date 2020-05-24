@@ -3,7 +3,9 @@
 class AdminController extends OurBlog_Controller_Action_PostLogin
 {
     public function indexAction()
-    {/*
+    {
+        return $this->response('this is admin/index');
+    /*
         $select = Zend_Db_Table_Abstract::getDefaultAdapter()
                   ->select()
                   ->from('posts', array('id', 'title'))

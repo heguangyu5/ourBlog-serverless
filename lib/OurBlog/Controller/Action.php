@@ -1,74 +1,73 @@
 <?php
 
-class OurBlog_Controller_Action extends Zend_Controller_Action
+class OurBlog_Controller_Action
 {
+    protected $uid;
+    protected $ost;
+
     public function preDispatch()
     {
-        $storage = new Zend_Auth_Storage_NonPersistent();
         $uid = $this->getParam('uid');
         $ost = $this->getParam('ost');
         if ($uid && $ost && OurBlog_Auth::isValidOST($ost, $uid)) {
-            $storage->write(array(
-                'uid' => $uid,
-                'ost' => $ost
-            ));
+            $this->uid = $uid;
+            $this->ost = $ost;
         }
-        Zend_Auth::getInstance()->setStorage($storage);
+    }
+
+    public function response($data, $response = 'SUCCESS')
+    {
+        $ret = array('response' => $response);
+        if ($data) {
+            $ret['data'] = $data;
+        }
+        return $ret;
+    }
+
+    public function failed($msg)
+    {
+        return $this->response($msg, 'FAILED');
+    }
+
+    public function invalidParams($msg = null)
+    {
+        return $this->response($msg, 'INVALID_PARAMS');
+    }
+
+    public function errorOccurred($msg = null)
+    {
+        return $this->response($msg, 'ERROR_OCCURRED');
     }
 
     public function getQuery($key = null, $default = null)
     {
-        return $this->getRequest()->getQuery($key, $default);
+        if ($key === null) {
+            return $_GET;
+        }
+
+        return isset($_GET[$key]) ? $_GET[$key] : $default;
     }
 
     public function getPost($key = null, $default = null)
     {
-        return $this->getRequest()->getPost($key, $default);
-    }
-
-    protected function disableLayoutAndView()
-    {
-        $this->_helper->layout->disableLayout();
-        $this->_helper->viewRenderer->setNoRender();
-    }
-
-    public function setLayout($layoutName)
-    {
-        $this->_helper->layout->setLayout($layoutName);
-    }
-
-    protected function disableLayout()
-    {
-        $this->_helper->layout->disableLayout();
-    }
-
-    protected function downloadFile($dir, $filename)
-    {
-        $path = $dir . '/' . $filename;
-        if (!is_file($path)) {
-            die('file not exists');
+        if ($key === null) {
+            return $_POST;
         }
 
-        header('Content-Type: application/octet-stream');
-        if (isset($_SERVER['HTTP_USER_AGENT']) && strpos($_SERVER['HTTP_USER_AGENT'], 'MSIE')) {
-            $filename = rawurlencode($filename);
-        }
-        header('Content-Disposition: attachment;filename="' . $filename . '"');
-        header('Cache-Control: max-age=0');
-
-        readfile($path);
+        return isset($_POST[$key]) ? $_POST[$key] : $default;
     }
 
-    public function initPaginator($select)
+    public function getParam($key = null, $default = null)
     {
-        Zend_Paginator::setDefaultScrollingStyle('Sliding');
-        Zend_View_Helper_PaginationControl::setDefaultViewPartial(
-            'pagination-control-default.phtml'
-        );
+        if ($key === null) {
+            return $_POST + $_GET;
+        }
 
-        return Zend_Paginator::factory($select)
-                               ->setItemCountPerPage(24)
-                               ->setPageRange(7)
-                               ->setCurrentPageNumber($this->getQuery('page'));
+        $param = $this->getPost($key);
+        if ($param !== null) {
+            return $param;
+        }
+
+        return $this->getQuery($key, $default);
     }
 }

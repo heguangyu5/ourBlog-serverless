@@ -1,6 +1,6 @@
 <?php
 
-class OurBlog_Auth implements Zend_Auth_Adapter_Interface
+class OurBlog_Auth
 {
     const SALT = 'EYFXOEII/T3Y/75D0pUXbz5bqxVIpo7qMipQ7MtnPaUHIvX1nDKgU6KfLf9JpYAvjO7dacpgt8C/';
 
@@ -40,16 +40,11 @@ class OurBlog_Auth implements Zend_Auth_Adapter_Interface
             $uid = 1;
         }
         if ($uid) {
-            return new Zend_Auth_Result(
-                Zend_Auth_Result::SUCCESS,
-                array(
-                    'uid' => $uid,
-                    'ost' => md5(self::SALT . '-OST-' . $uid)
-                )
+            return array(
+                'uid' => $uid,
+                'ost' => md5(self::SALT . '-OST-' . $uid)
             );
         }
-
-        return new Zend_Auth_Result(Zend_Auth_Result::FAILURE, null);
     }
 
     public static function isValidOST($ost, $uid)
