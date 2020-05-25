@@ -67,13 +67,14 @@ class OurBlog_AuthTest extends OurBlog_DatabaseTestCase
 
     public function testAuthenticateWillReturnUIDIfEmailPasswordOK()
     {
-        $auth   = new OurBlog_Auth('heguangyu5@qq.com', '123456');
-        $result = $auth->authenticate();
-
-        $this->assertInstanceOf('Zend_Auth_Result', $result);
-        $this->assertEquals(Zend_Auth_Result::SUCCESS, $result->getCode());
-        $this->assertEquals(1, $result->getIdentity());
-        $this->assertTrue($result->isValid());
+        $auth = new OurBlog_Auth('heguangyu5@qq.com', '123456');
+        $this->assertEquals(
+            $auth->authenticate(),
+            array(
+                'uid' => 1,
+                'ost' => '62884a59ed872acaf02df6ae0a8dd52a'
+            )
+        );
     }
 
     public function wrongEmailPasswords()
@@ -90,12 +91,7 @@ class OurBlog_AuthTest extends OurBlog_DatabaseTestCase
      */
     public function testAuthenticateWillReturnFalseIfEmailPasswordNotMatch($email, $password)
     {
-        $auth   = new OurBlog_Auth($email, $password);
-        $result = $auth->authenticate();
-
-        $this->assertInstanceOf('Zend_Auth_Result', $result);
-        $this->assertEquals(Zend_Auth_Result::FAILURE, $result->getCode());
-        $this->assertEquals(0, $result->getIdentity());
-        $this->assertFalse($result->isValid());
+        $auth = new OurBlog_Auth($email, $password);
+        $this->assertNull($auth->authenticate());
     }
 }

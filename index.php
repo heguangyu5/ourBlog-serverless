@@ -8,7 +8,10 @@ define('APP_LIB_PATH',    APP_PATH . '/lib');
 set_include_path('/opt' . PATH_SEPARATOR . get_include_path());
 
 spl_autoload_register(function ($class) {
-    include APP_LIB_PATH . '/' . str_replace('_', '/', $class) . '.php';
+    $path = APP_LIB_PATH . '/' . str_replace('_', '/', $class) . '.php';
+    if (file_exists($path)) {
+        include $path;
+    }
 }, true, true);
 
 function main_handler($event, $context)

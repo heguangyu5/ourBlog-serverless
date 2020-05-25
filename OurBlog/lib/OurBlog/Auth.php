@@ -29,16 +29,12 @@ class OurBlog_Auth
     }
 
     public function authenticate()
-    {/*
-        $uid = Zend_Db_Table_Abstract::getDefaultAdapter()->fetchOne(
+    {
+        $uid = OurBlog_Db::getInstance()->fetchOne(
             'SELECT uid FROM user WHERE email = ? AND password = ?',
             array($this->email, md5(self::SALT . '-' . $this->password))
         );
-*/
-        $uid = 0;
-        if ($this->email == 'heguangyu5@qq.com' && $this->password == '123456') {
-            $uid = 1;
-        }
+
         if ($uid) {
             return array(
                 'uid' => $uid,
