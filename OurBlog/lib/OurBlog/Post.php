@@ -77,10 +77,10 @@ class OurBlog_Post
             unset($data['tags']);
             if ($tagIdMap) {
                 // filter out exist tags
-                $tagRows = Zend_Db_Table_Abstract::getDefaultAdapter()->fetchAll(
+                $tagRows = OurBlog_Db::getInstance()->fetchAll(
                     'SELECT id, name FROM tag WHERE name IN (?' . str_repeat(', ?', count($tagIdMap) - 1) . ')',
                     array_keys($tagIdMap),
-                    Zend_Db::FETCH_OBJ
+                    PDO::FETCH_OBJ
                 );
                 foreach ($tagRows as $row) {
                     $tagIdMap[$row->name] = $row->id;
@@ -106,7 +106,7 @@ class OurBlog_Post
 
         $createDate = date('Y-m-d H:i:s');
 
-        $db = Zend_Db_Table_Abstract::getDefaultAdapter();
+        $db = OurBlog_Db::getInstance();
         $db->beginTransaction();
         try {
             // post
@@ -153,10 +153,10 @@ class OurBlog_Post
             throw new InvalidArgumentException('invalid id');
         }
 
-        $post = Zend_Db_Table_Abstract::getDefaultAdapter()->fetchRow(
+        $post = OurBlog_Db::getInstance()->fetchRow(
             'SELECT id, external_post FROM posts WHERE id = ' . $data['id'] . ' AND uid = ' . $this->uid,
             array(),
-            Zend_Db::FETCH_OBJ
+            PDO::FETCH_OBJ
         );
         if (!$post) {
             throw new InvalidArgumentException('you can only edit your own post');
@@ -171,15 +171,11 @@ class OurBlog_Post
     public function edit(array $data)
     {
         $data = $this->prepareEditPostData($data);
-        $db   = Zend_Db_Table_Abstract::getDefaultAdapter();
+        $db   = OurBlog_Db::getInstance();
 
         if (isset($data['tagIdMap'])) {
             // 取得post原有的tag
-            $postTagIds = $db->fetchAll(
-                'SELECT tag_id FROM post_tag WHERE post_id = ' . $data['id'],
-                array(),
-                Zend_Db::FETCH_COLUMN
-            );
+            $postTagIds = $db->fetchCol('SELECT tag_id FROM post_tag WHERE post_id = ' . $data['id']);
             // diff
             $tagIds = array();
             foreach ($data['tagIdMap'] as $tagId) {
@@ -243,7 +239,7 @@ class OurBlog_Post
             throw new InvalidArgumentException('invalid id');
         }
 
-        $db = Zend_Db_Table_Abstract::getDefaultAdapter();
+        $db = OurBlog_Db::getInstance();
         $id = $db->fetchOne("SELECT id FROM posts WHERE id = $id AND uid = " . $this->uid);
         if (!$id) {
             throw new InvalidArgumentException('you can only delete your own post');

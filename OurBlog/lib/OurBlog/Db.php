@@ -27,15 +27,70 @@ class OurBlog_Db
         return self::$instance;
     }
 
-    public function getPdo()
-    {
-        return $this->pdo;
-    }
-
     public function fetchOne($sql, $bind = array())
     {
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute($bind);
         return $stmt->fetchColumn();
+    }
+
+    public function fetchRow($sql, $bind = array(), $style = PDO::FETCH_ASSOC)
+    {
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute($bind);
+        return $stmt->fetch($style);
+    }
+
+    public function fetchAll($sql, $bind = array(), $style = PDO::FETCH_ASSOC)
+    {
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute($bind);
+        return $stmt->fetchAll($style);
+    }
+
+    public function fetchCol($sql, $bind = array())
+    {
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute($bind);
+        return $stmt->fetchAll(PDO::FETCH_COLUMN);
+    }
+
+    public function insert($table, array $row)
+    {
+        if (!$row) {
+            $this->pdo->exec("INSERT INTO `$table` VALUES (NULL)");
+            return;
+        }
+
+        $columns = array();
+        foreach (array_keys($row) as $key) {
+            $columns[] = "`$key`";
+        }
+        $columns = implode(',', $columns);
+        $placeholders = str_repeat('?,', count($row) - 1) . '?';
+        $sql = "INSERT INTO `$table` ($columns) VALUES ($placeholders)";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute(array_values($row));
+    }
+
+    public function update($table, array $row, $where = '1')
+    {
+        if (!$row) {
+            throw new Exception('update with empty row is not allowed!');
+        }
+
+        $updateData = array();
+        foreach (array_keys($row) as $key) {
+            $updateData[] = "`$key` = ?";
+        }
+        $updateData = implode(',', $updateData);
+        $sql = "UPDATE `$table` SET $updateData WHERE $where";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute(array_values($row));
+    }
+
+    public function __call($name, $args)
+    {
+        return call_user_func_array(array($this->pdo, $name), $args);
     }
 }
