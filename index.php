@@ -31,7 +31,7 @@ function main_handler($event, $context)
     );
     if ($moduleControllerAction == '') {
         $module     = 'default';
-        $controller = 'index';
+        $controller = 'Index';
         $action     = 'index';
     } elseif (preg_match('#^(/[-a-zA-Z0-9]+){1,3}$#', $moduleControllerAction)) {
         $moduleControllerAction = explode('/', $moduleControllerAction);

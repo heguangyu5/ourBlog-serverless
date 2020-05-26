@@ -39,6 +39,11 @@ class OurBlog_Controller_Action
         return $this->response($msg, 'ERROR_OCCURRED');
     }
 
+    public function notFound404($msg = null)
+    {
+        return $this->response($msg, '404');
+    }
+
     public function getQuery($key = null, $default = null)
     {
         if ($key === null) {
