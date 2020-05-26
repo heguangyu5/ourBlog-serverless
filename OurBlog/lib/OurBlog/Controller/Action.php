@@ -18,7 +18,7 @@ class OurBlog_Controller_Action
     public function response($data, $response = 'SUCCESS')
     {
         $ret = array('response' => $response);
-        if ($data) {
+        if ($data !== null) {
             $ret['data'] = $data;
         }
         return $ret;
