@@ -117,6 +117,7 @@ function main_handler($event, $context)
         echo "\n\n";
         echo "--\$_POST--\n\n";
         var_export($_POST);
+        return array('response' => 'ERROR_OCCURRED');
     }
 }
 

@@ -45,7 +45,7 @@ class IndexController extends OurBlog_Controller_Action
             return $this->invalidParams();
         }
         $post = OurBlog_Db::getInstance()->fetchRow(
-            "SELECT title, content, external_post FROM posts WHERE id = $id"
+            "SELECT id, title, content, external_post FROM posts WHERE id = $id"
         );
         if (!$post) {
             return $this->notFound404();
