@@ -81,7 +81,7 @@ function main_handler($event, $context)
     $_GET = (array)$event->queryString;
     // $_POST
     if ($event->httpMethod == 'POST') {
-        if (   $event->headers->{'content-type'} == 'application/x-www-form-urlencoded'
+        if (   strncasecmp($event->headers->{'content-type'}, 'application/x-www-form-urlencoded', 33) == 0
             && $event->body
         ) {
             parse_str($event->body, $_POST);
